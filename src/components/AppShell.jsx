@@ -1,4 +1,6 @@
 import { CalendarDays, ChevronDown, CircleHelp, Code2, Database, GraduationCap, Link2, Search, ShieldCheck, Bell, MoreHorizontal } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { getNotifications, getUnreadNotificationsCount, markAllNotificationsRead } from "../lib/notifications";
 
 const navItems = [
   ["calendar", "Lịch của tôi", CalendarDays], ["import", "Nhập lịch HTML", Code2],
@@ -16,12 +18,56 @@ export function Sidebar({ page, go, user, onLogout }) {
 
 export function Topbar({ title, user, onLogout }) {
   const userName = user?.email ? user.email.split("@")[0].replace(/[._]/g, " ") : "Sinh viên";
+  const [notifications, setNotifications] = useState([]);
+  const [open, setOpen] = useState(false);
+  const unreadCount = useMemo(() => notifications.filter((item) => !item.read).length, [notifications]);
+
+  useEffect(() => {
+    const refresh = () => setNotifications(getNotifications());
+    refresh();
+    window.addEventListener("lichhoc:notificationsChanged", refresh);
+    return () => window.removeEventListener("lichhoc:notificationsChanged", refresh);
+  }, []);
+
+  const handleOpen = () => {
+    setOpen((prev) => !prev);
+    if (!open) {
+      markAllNotificationsRead();
+      setNotifications(getNotifications());
+    }
+  };
+
   return (
     <header className="topbar">
       <div className="crumb"><GraduationCap size={18} /><span>Đại học</span><span className="crumb-slash">/</span><b>{title}</b></div>
       <div className="top-actions">
         <div className="search-box"><Search size={16} /><input aria-label="Tìm kiếm" placeholder="Tìm kiếm..." /><kbd>⌘ K</kbd></div>
-        <button className="icon-button" aria-label="Thông báo"><Bell size={18} /><i /></button>
+        <div className="notification-wrap">
+          <button className="icon-button" aria-label="Thông báo" onClick={handleOpen}>
+            <Bell size={18} />
+            {unreadCount > 0 && <i />}
+          </button>
+          {open && (
+            <div className="notification-panel">
+              <div className="notification-header">
+                <strong>Thông báo</strong>
+                <span>{unreadCount} mới</span>
+              </div>
+              <div className="notification-list">
+                {notifications.slice(0, 5).map((item) => (
+                  <div key={item.id} className={`notification-item ${item.read ? "read" : "unread"}`}>
+                    <div className={`notification-badge ${item.kind || "info"}`} />
+                    <div>
+                      <b>{item.title}</b>
+                      <p>{item.message}</p>
+                      <small>{new Date(item.createdAt).toLocaleString("vi-VN", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "2-digit" })}</small>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
         <span className="top-divider" />
         <button className="user-chip" type="button"><span className="avatar-initial">{userName.charAt(0).toUpperCase()}</span><span>{userName}</span><ChevronDown size={15} /></button>
         {onLogout && <button type="button" className="button outline" onClick={onLogout}>Đăng xuất</button>}

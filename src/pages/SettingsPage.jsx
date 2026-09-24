@@ -2,11 +2,105 @@ import { Users, CalendarDays, Bell, Link2, GraduationCap } from "lucide-react";
 import { PageHeading, Button, Badge } from "../components/AppShell";
 import { Field } from "../components/Display";
 import { getCurrentUser } from "../lib/api";
+import { getNotifications } from "../lib/notifications";
 
 export function SettingsPage() {
   const currentUser = getCurrentUser();
   const userName = currentUser?.email ? currentUser.email.split("@")[0].replace(/[._]/g, " ") : "Nguyễn Văn Minh";
   const avatarInitial = userName.charAt(0).toUpperCase() || "M";
+  const notifications = getNotifications().slice(0, 4);
 
-  return <><PageHeading eyebrow="TÙY CHỈNH KHÔNG GIAN" title="Cài đặt & kết nối" detail="Quản lý tài khoản, tùy chọn lịch và các kết nối của bạn." /><div className="settings-layout"><nav className="settings-nav"><a className="chosen"><Users size={17} />Tài khoản</a><a><CalendarDays size={17} />Tùy chọn lịch</a><a><Bell size={17} />Thông báo</a><a><Link2 size={17} />Kết nối</a></nav><div className="settings-content"><section className="panel settings-panel"><div className="settings-title"><div><h2>Thông tin cá nhân</h2><p>Cập nhật thông tin hiển thị trên hồ sơ của bạn.</p></div><Button variant="outline">Chỉnh sửa</Button></div><div className="avatar-edit"><span className="avatar-large">{avatarInitial}</span><span><b>Ảnh đại diện</b><small>{currentUser?.is_admin ? "Admin toàn quyền" : "Sinh viên"}</small></span><Button variant="outline">Thay ảnh</Button></div><div className="form-grid"><Field label="Họ và tên" value={userName} /><Field label="Email sinh viên" value={currentUser?.email || "admin@lichhoc.local"} /><Field label="Vai trò" value={currentUser?.is_admin ? "Administrator" : "Student"} /><Field label="Khoa" value="Công nghệ thông tin" /></div></section><section className="panel settings-panel"><div className="settings-title"><div><h2>Tích hợp hệ thống</h2><p>Kết nối với cổng đào tạo và các dịch vụ hỗ trợ.</p></div><Badge tone="green">2 kết nối</Badge></div>{[["Cổng đào tạo", "Đồng bộ thời khóa biểu tự động", "Đã kết nối", "blue"], ["Google Calendar", "Xuất lịch sang lịch cá nhân", "Chưa kết nối", "gray"]].map(([name, desc, state, tone]) => <div className="integration-row" key={name}><div className={`integration-icon ${tone}`}>{name.startsWith("Cổng") ? <GraduationCap size={20} /> : <CalendarDays size={20} />}</div><span><b>{name}</b><small>{desc}</small></span><Badge tone={state.startsWith("Đã") ? "green" : "gray"}>{state}</Badge><Button variant="outline">{state.startsWith("Đã") ? "Quản lý" : "Kết nối"}</Button></div>)}</section></div></div></> }
+  return (
+    <>
+      <PageHeading eyebrow="TÙY CHỈNH KHÔNG GIAN" title="Cài đặt & kết nối" detail="Quản lý tài khoản, tùy chọn lịch và các kết nối của bạn." />
+      <div className="settings-layout">
+        <nav className="settings-nav">
+          <a className="chosen"><Users size={17} />Tài khoản</a>
+          <a><CalendarDays size={17} />Tùy chọn lịch</a>
+          <a><Bell size={17} />Thông báo</a>
+          <a><Link2 size={17} />Kết nối</a>
+        </nav>
+
+        <div className="settings-content">
+          <section className="panel settings-panel">
+            <div className="settings-title">
+              <div>
+                <h2>Thông tin cá nhân</h2>
+                <p>Cập nhật thông tin hiển thị trên hồ sơ của bạn.</p>
+              </div>
+              <Button variant="outline">Chỉnh sửa</Button>
+            </div>
+
+            <div className="avatar-edit">
+              <span className="avatar-large">{avatarInitial}</span>
+              <span>
+                <b>Ảnh đại diện</b>
+                <small>{currentUser?.is_admin ? "Admin toàn quyền" : "Sinh viên"}</small>
+              </span>
+              <Button variant="outline">Thay ảnh</Button>
+            </div>
+
+            <div className="form-grid">
+              <Field label="Họ và tên" value={userName} />
+              <Field label="Email sinh viên" value={currentUser?.email || "admin@lichhoc.local"} />
+              <Field label="Vai trò" value={currentUser?.is_admin ? "Administrator" : "Student"} />
+              <Field label="Khoa" value="Công nghệ thông tin" />
+            </div>
+          </section>
+
+          <section className="panel settings-panel">
+            <div className="settings-title">
+              <div>
+                <h2>Thông báo</h2>
+                <p>Các cảnh báo, ưu đãi và thay đổi bảo mật gần đây.</p>
+              </div>
+              <Badge tone="green">{notifications.length} tin</Badge>
+            </div>
+
+            <div className="notification-settings-list">
+              {notifications.map((item) => (
+                <div key={item.id} className={`notify-row ${item.kind}`}>
+                  <span className="notify-dot" />
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.message}</p>
+                    <small>{item.actor} • {new Date(item.createdAt).toLocaleString("vi-VN")}</small>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className="panel settings-panel">
+            <div className="settings-title">
+              <div>
+                <h2>Tích hợp hệ thống</h2>
+                <p>Kết nối với cổng đào tạo và các dịch vụ hỗ trợ.</p>
+              </div>
+              <Badge tone="green">2 kết nối</Badge>
+            </div>
+
+            {[
+              ["Cổng đào tạo", "Đồng bộ thời khóa biểu tự động", "Đã kết nối", "blue"],
+              ["Google Calendar", "Xuất lịch sang lịch cá nhân", "Chưa kết nối", "gray"],
+            ].map(([name, desc, state, tone]) => (
+              <div className="integration-row" key={name}>
+                <div className={`integration-icon ${tone}`}>
+                  {name.startsWith("Cổng") ? <GraduationCap size={20} /> : <CalendarDays size={20} />}
+                </div>
+                <span>
+                  <b>{name}</b>
+                  <small>{desc}</small>
+                </span>
+                <Badge tone={state.startsWith("Đã") ? "green" : "gray"}>{state}</Badge>
+                <Button variant="outline">{state.startsWith("Đã") ? "Quản lý" : "Kết nối"}</Button>
+              </div>
+            ))}
+          </section>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default SettingsPage;
