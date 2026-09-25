@@ -133,29 +133,12 @@ export function AuthPage({ mode, go }) {
     }
   };
 
+  // Nếu mở từ Extension, lắng nghe và tự động chuyển hướng khi thành công
   const isExtension =
     window.location.search.includes("source=extension") ||
     window.location.hash.includes("source=extension") ||
     window.location.search.includes("ext=1") ||
     window.location.hash.includes("ext=1");
-
-  const isAutoGoogle =
-    window.location.search.includes("action=google") ||
-    window.location.hash.includes("action=google") ||
-    window.location.search.includes("auth=g") ||
-    window.location.hash.includes("auth=g");
-
-  useEffect(() => {
-    if (isExtension && isAutoGoogle) {
-      const timer = setTimeout(() => {
-        const btn = document.querySelector(".btn-google-login");
-        if (btn) {
-          btn.click();
-        }
-      }, 350);
-      return () => clearTimeout(timer);
-    }
-  }, [isExtension, isAutoGoogle]);
 
   const handleGoogleSuccess = (res) => {
     if (isExtension) {
