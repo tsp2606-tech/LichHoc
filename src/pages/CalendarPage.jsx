@@ -55,6 +55,21 @@ function formatDateKey(d) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
 }
 
+function formatWeekRange(mon) {
+  if (!mon) return "";
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  const fmt = (d) => `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
+  return `${fmt(mon)} - ${fmt(sun)}`;
+}
+
+function extractWeekRange(str) {
+  if (!str) return "";
+  const m = str.match(/(\d{2}\/\d{2}\/\d{4})\s*-\s*(\d{2}\/\d{2}\/\d{4})/);
+  if (m) return `${m[1]}-${m[2]}`;
+  return str.replace(/\s+/g, "").toLowerCase();
+}
+
 export function CalendarPage() {
   const [apiCourses, setApiCourses] = useState([]);
   const [syncing, setSyncing] = useState(false);
@@ -99,23 +114,42 @@ export function CalendarPage() {
 
   // Hàm kiểm tra một tuần có hiển thị lịch hay không:
   // - Nếu chưa qua tuần mới: Tuần hiện tại KHÔNG bị xóa và GIỮ LẠI tuần trước của tuần hiện tại.
-  // - Các tuần cũ hơn tuần trước sẽ bị xóa (để trống).
-  // - Các tuần tương lai khi bấm tiến qua tuần sẽ để trống (không tự động nhân bản môn học tuần cũ).
+  // - Các tuần trong quá khứ cũ hơn tuần trước (< prevRealMonday) sẽ bị xóa (để trống).
+  // - Các tuần học tiếp theo trong kỳ học (>= currentRealMonday): Hiển thị đầy đủ lịch đã đồng bộ từ myDTU.
   // - Khi người dùng bấm vào ngày trong chế độ xem Tháng thì hiển thị lịch duy nhất cho tuần chứa ngày đó.
   const checkWeekHasSchedule = useCallback(
     (monDate) => {
       if (!monDate) return false;
       const targetKey = formatDateKey(monDate);
 
-      // Ưu tiên tuần được click từ chế độ xem Tháng
+      // Ưu tiên tuần được click chọn đích danh từ chế độ xem Tháng
       if (selectedMonthWeek) {
         return targetKey === formatDateKey(selectedMonthWeek);
       }
 
-      // Mặc định: Giữ lại tuần hiện tại và tuần trước của tuần hiện tại
-      const currentKey = formatDateKey(currentRealMonday);
-      const prevKey = formatDateKey(prevRealMonday);
-      return targetKey === currentKey || targetKey === prevKey;
+      // 1. Các tuần trong quá khứ cũ hơn tuần trước (< prevRealMonday): Xóa lịch (trống lịch)
+      if (monDate.getTime() < prevRealMonday.getTime()) {
+        return false;
+      }
+
+      // 2. Tuần trước của tuần hiện tại (prevRealMonday): Giữ lại lịch học
+      if (targetKey === formatDateKey(prevRealMonday)) {
+        return true;
+      }
+
+      // 3. Tuần hiện tại (currentRealMonday): Giữ nguyên lịch học
+      if (targetKey === formatDateKey(currentRealMonday)) {
+        return true;
+      }
+
+      // 4. Các tuần tương lai trong học kỳ (tối đa 20 tuần tiếp theo): Hiển thị lịch học đã đồng bộ
+      const maxSemesterMonday = new Date(currentRealMonday);
+      maxSemesterMonday.setDate(currentRealMonday.getDate() + 20 * 7);
+      if (monDate.getTime() <= maxSemesterMonday.getTime()) {
+        return true;
+      }
+
+      return false;
     },
     [selectedMonthWeek, currentRealMonday, prevRealMonday]
   );
@@ -288,25 +322,29 @@ export function CalendarPage() {
       const formatted = schedule.map((event, index) => formatCourseFromEvent(event, index));
       setApiCourses(formatted);
       setSelectedMonthWeek(null);
-      setCurrentDate(new Date());
       setSyncSuccess(true);
       setSyncMessage(`Đồng bộ thành công! Đã tải về ${schedule.length} môn học từ máy chủ.`);
     } catch (err) {
       setSyncSuccess(false);
-      const errMsg = err.message || "Không thể đồng bộ dữ liệu lịch học từ máy chủ.";
+      const isAuthErr = err.status === 401 || /token|hết hạn|auth/i.test(err.message || "");
+      const errMsg = isAuthErr
+        ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại để tiếp tục đồng bộ lịch học."
+        : err.message || "Không thể đồng bộ dữ liệu lịch học từ máy chủ.";
       setSyncMessage(errMsg);
       setErrorDialog({
-        title: "Đồng bộ lịch học thất bại",
+        title: isAuthErr ? "Phiên đăng nhập hết hạn" : "Đồng bộ lịch học thất bại",
         message: errMsg,
         code: err.status ? `HTTP_${err.status}` : "SYNC_ERROR",
         type: "error",
+        onConfirm: isAuthErr ? () => { window.location.hash = "#/login"; } : undefined,
+        confirmText: isAuthErr ? "Đăng nhập lại" : "Đã hiểu & thử lại",
       });
     } finally {
       setSyncing(false);
     }
   };
 
-  // #2. Gộp các môn trùng nhau thành 1
+  // #2. Gộp các môn trùng nhau theo từng tuần (giữ nguyên tính riêng biệt của từng tuần)
   const uniqueCourses = useMemo(() => {
     const list = apiCourses.length ? apiCourses : classes;
     const map = new Map();
@@ -339,7 +377,10 @@ export function CalendarPage() {
 
       const code = c.classCode || c.code || "";
       const subject = c.subject || c.name || "Lịch học";
-      const key = `${dIdx}-${code}-${subject}-${sTime}-${eTime}`;
+      const wRange = (c.weekRange || "").trim();
+      const normWRange = extractWeekRange(wRange);
+      // Key giữ riêng biệt các môn của từng tuần khác nhau
+      const key = `${normWRange}_${dIdx}_${code}_${subject}_${sTime}_${eTime}_${c.room || ""}`;
 
       if (!map.has(key)) {
         map.set(key, {
@@ -348,6 +389,7 @@ export function CalendarPage() {
           dayIndex: dIdx,
           classCode: code,
           subject,
+          weekRange: wRange,
           startTime: sTime,
           endTime: eTime,
           timeText: `${sTime} - ${eTime}`,
@@ -359,11 +401,26 @@ export function CalendarPage() {
     return Array.from(map.values());
   }, [apiCourses]);
 
-  // Các môn học hiển thị cho tuần đang xem (Chỉ tuần duy nhất có lịch mới có môn học, qua tuần mới thì tuần cũ bị xóa lịch)
+  // Các môn học hiển thị cho tuần đang xem
   const displayedCourses = useMemo(() => {
     if (!isCurrentViewActiveWeek) return [];
+
+    const currentWeekRangeStr = formatWeekRange(monday);
+    const targetNormWeek = extractWeekRange(currentWeekRangeStr);
+
+    // Kiểm tra xem danh sách có môn học nào có thông tin tuần cụ thể không
+    const hasSpecificWeek = uniqueCourses.some((c) => Boolean(c.weekRange));
+
+    if (hasSpecificWeek) {
+      // Chỉ hiển thị các môn học thuộc chính xác tuần này
+      return uniqueCourses.filter((c) => {
+        if (!c.weekRange) return true; // Môn không có weekRange (nếu có)
+        return extractWeekRange(c.weekRange) === targetNormWeek;
+      });
+    }
+
     return uniqueCourses;
-  }, [isCurrentViewActiveWeek, uniqueCourses]);
+  }, [isCurrentViewActiveWeek, uniqueCourses, monday]);
 
   // #4. Tính toán tiết học tiếp theo một cách đồng bộ từ dữ liệu
   const nextClass = useMemo(() => {
@@ -403,10 +460,10 @@ export function CalendarPage() {
     const fmt = (d) => `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
     const baseWeekText = `Tuần: ${fmt(monday)} - ${fmt(sunday)}`;
     if (!isCurrentViewActiveWeek) {
-      if (monday.getTime() > currentRealMonday.getTime()) {
-        return `${baseWeekText} · (Tuần tương lai - Chưa có lịch học)`;
-      }
       return `${baseWeekText} · (Tuần trống - Lịch tuần cũ đã được xóa)`;
+    }
+    if (displayedCourses.length === 0 && uniqueCourses.length > 0) {
+      return `${baseWeekText} · (Chưa có lịch cho tuần này)`;
     }
     if (formatDateKey(monday) === formatDateKey(currentRealMonday)) {
       return `${baseWeekText} · (Tuần hiện tại đang học)`;
@@ -414,8 +471,11 @@ export function CalendarPage() {
     if (formatDateKey(monday) === formatDateKey(prevRealMonday)) {
       return `${baseWeekText} · (Tuần trước - Được lưu trữ)`;
     }
+    if (monday.getTime() > currentRealMonday.getTime()) {
+      return `${baseWeekText} · (Lịch học tuần tới)`;
+    }
     return `${baseWeekText} · (Tuần đang có lịch học)`;
-  }, [viewMode, currentDate, monday, sunday, isCurrentViewActiveWeek, currentRealMonday, prevRealMonday]);
+  }, [viewMode, currentDate, monday, sunday, isCurrentViewActiveWeek, displayedCourses.length, uniqueCourses.length, currentRealMonday, prevRealMonday]);
 
   // Danh sách các ngày trong tuần kèm danh sách môn đã sắp xếp (cho chế độ xem Liệt kê)
   const weekDaysList = useMemo(() => {
@@ -463,9 +523,9 @@ export function CalendarPage() {
               ? "Tuần này trống lịch"
               : formatDateKey(monday) === formatDateKey(prevRealMonday)
               ? "Lưu trữ tuần trước"
-              : apiCourses.length
-              ? "Đồng bộ từ myDTU"
-              : "Dữ liệu mẫu"
+              : formatDateKey(monday) === formatDateKey(currentRealMonday)
+              ? (apiCourses.length ? "Đồng bộ từ myDTU" : "Dữ liệu mẫu")
+              : "Lịch học tuần tới"
           }
           icon={BookOpen}
           tone="stat-blue"
@@ -488,12 +548,12 @@ export function CalendarPage() {
           value={isCurrentViewActiveWeek ? (apiCourses.length ? "Đã kết nối" : "Sẵn sàng") : "Trống lịch"}
           note={
             !isCurrentViewActiveWeek
-              ? monday.getTime() > currentRealMonday.getTime()
-                ? "Tuần chưa tới"
-                : "Lịch tuần cũ đã xóa"
+              ? "Lịch tuần cũ đã xóa"
               : formatDateKey(monday) === formatDateKey(prevRealMonday)
               ? "Lưu trữ tuần trước"
-              : `Đã đồng bộ ${displayedCourses.length} môn từ DTU`
+              : formatDateKey(monday) === formatDateKey(currentRealMonday)
+              ? `Đã đồng bộ ${displayedCourses.length} môn từ DTU`
+              : "Lịch học đã sẵn sàng"
           }
           icon={Activity}
           tone="stat-purple"
@@ -877,8 +937,17 @@ export function CalendarPage() {
                 {monthCalendarData.map((cell, idx) => {
                   const cellMonday = getMonday(cell.date);
                   const isCellInActiveWeek = checkWeekHasSchedule(cellMonday);
+                  const cellWeekRange = extractWeekRange(formatWeekRange(cellMonday));
+                  const hasSpecificWeek = uniqueCourses.some((c) => Boolean(c.weekRange));
+
                   const dayCourses = isCellInActiveWeek
-                    ? uniqueCourses.filter((c) => c.dayIndex === cell.dayOfWeekIndex)
+                    ? uniqueCourses.filter((c) => {
+                        if (c.dayIndex !== cell.dayOfWeekIndex) return false;
+                        if (hasSpecificWeek && c.weekRange) {
+                          return extractWeekRange(c.weekRange) === cellWeekRange;
+                        }
+                        return true;
+                      })
                     : [];
 
                   return (
@@ -1154,6 +1223,8 @@ export function CalendarPage() {
         message={errorDialog?.message}
         code={errorDialog?.code}
         type={errorDialog?.type || "error"}
+        confirmText={errorDialog?.confirmText}
+        onConfirm={errorDialog?.onConfirm}
         onClose={() => setErrorDialog(null)}
       />
     </>

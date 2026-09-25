@@ -20,6 +20,8 @@ export function ErrorDialog({
   message = "Vui lòng kiểm tra lại thông tin và thử lại.",
   code = "",
   type = "error", // "error" | "warning"
+  confirmText = "Đã hiểu & thử lại",
+  onConfirm,
   onClose,
 }) {
   if (!isOpen) return null;
@@ -160,7 +162,10 @@ export function ErrorDialog({
         >
           <button
             type="button"
-            onClick={onClose}
+            onClick={() => {
+              if (onConfirm) onConfirm();
+              onClose?.();
+            }}
             style={{
               padding: "8px 20px",
               borderRadius: "8px",
@@ -174,7 +179,7 @@ export function ErrorDialog({
               transition: "opacity 0.15s ease",
             }}
           >
-            Đã hiểu & thử lại
+            {confirmText || "Đã hiểu & thử lại"}
           </button>
         </div>
       </div>

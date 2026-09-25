@@ -159,6 +159,10 @@ async function apiRequest(path, options = {}) {
         }
       }
     }
+
+    if (response.status === 401) {
+      clearAuth();
+    }
   }
 
   const text = await response.text();
@@ -198,11 +202,9 @@ export async function loginUser({ email, password, remember_me = false }) {
     setAuthToken(data.access_token);
     setCurrentUser(data.user || null);
 
-    // Chỉ lưu refresh_token khi người dùng chọn remember_me
-    if (data.refresh_token && remember_me) {
+    // Lưu refresh_token nếu có
+    if (data.refresh_token) {
       setRefreshToken(data.refresh_token);
-    } else {
-      setRefreshToken(null);
     }
   }
 
@@ -246,6 +248,7 @@ export function normalizeScheduleEvent(event, index = 0) {
   const dayIndex = Number(source.day_index ?? source.dayIndex ?? 0);
   const classCode = source.class_code || source.classCode || `L${index + 1}`;
   const subject = source.subject || source.name || "Lịch học";
+  const weekRange = (source.week_range || source.weekRange || "").trim();
 
   return {
     id: source.id ?? `${classCode}-${index}`,
@@ -257,6 +260,7 @@ export function normalizeScheduleEvent(event, index = 0) {
     location,
     startTime,
     endTime,
+    weekRange,
     isOnline:
       /online/i.test(room) || /online/i.test(location) || /online/i.test(source.location || "") || /online/i.test(source.subject || ""),
   };
@@ -272,6 +276,7 @@ export function toServerEvent(event) {
     end_time: event.endTime || event.end_time || "09:00",
     day_index: Number(event.dayIndex ?? event.day_index ?? 0),
     day_name: event.dayName || event.day_name || `Ngày ${Number(event.dayIndex ?? event.day_index ?? 0) + 1}`,
+    week_range: (event.weekRange || event.week_range || "").trim(),
   };
 }
 
@@ -356,6 +361,7 @@ export async function deleteCourseById(courseId) {
 
 export function formatCourseFromEvent(event, index) {
   const dayText = event.dayName || `Ngày ${Number(event.dayIndex || 0) + 1}`;
+  const weekRange = (event.weekRange || event.week_range || "").trim();
   return {
     id: event.id,
     day: dayText,
@@ -363,7 +369,8 @@ export function formatCourseFromEvent(event, index) {
     dayName: dayText,
     startTime: event.startTime || "07:00",
     endTime: event.endTime || "09:00",
-    date: `Tuần ${index + 1}`,
+    date: weekRange ? `Tuần ${weekRange}` : `Tuần ${index + 1}`,
+    weekRange,
     time: `${event.startTime || "07:00"} – ${event.endTime || "09:00"}`,
     name: event.subject || "Lịch học",
     subject: event.subject || "Lịch học",

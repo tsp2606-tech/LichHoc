@@ -12,7 +12,7 @@ export function AuthPage({ mode, go }) {
     password: "",
     confirmPassword: "",
   });
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [errorDialog, setErrorDialog] = useState(null); // { title, message, code, type }
