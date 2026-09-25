@@ -10,10 +10,46 @@ const navItems = [
 export function Brand() { return <a className="brand" href="#/calendar"><span className="brand-mark"><CalendarDays size={21} /></span><span><b>LichHoc</b><small>Không gian học tập của bạn</small></span></a>; }
 
 export function Sidebar({ page, go, user, onLogout }) {
-  const userName = user?.email ? user.email.split("@")[0].replace(/[._]/g, " ") : "Sinh viên";
+  const userName = user?.name || (user?.email ? user.email.split("@")[0].replace(/[._]/g, " ") : "Sinh viên");
   const initial = userName.charAt(0).toUpperCase() || "S";
+  const visibleNav = navItems.filter(([id]) => id !== "admin" || Boolean(user?.is_admin));
 
-  return <aside className="sidebar"><Brand /><div className="side-label">KHÔNG GIAN CỦA BẠN</div><nav className="side-nav" aria-label="Điều hướng chính">{navItems.map(([id, label, Icon]) => <a key={id} href={`#/${id}`} onClick={() => go(id)} className={`nav-link ${page === id ? "active" : ""}`}><Icon size={18} /><span>{label}</span>{id === "calendar" && <span className="nav-count">6</span>}</a>)}</nav><div className="semester-card"><div className="sem-top"><span className="live-dot" /> HỌC KỲ HIỆN TẠI</div><b>Học kỳ 1 · 2025–2026</b><span>Đại học Bách khoa Hà Nội</span><div className="semester-progress"><i /></div><small>Tuần 8 trên 15</small></div><div className="sidebar-bottom"><a className="nav-link" href="#/help"><CircleHelp size={18} />Trợ giúp & hướng dẫn</a><div className="profile-mini"><span className="avatar-initial">{initial}</span><span><b>{userName}</b><small>{user?.is_admin ? "Admin toàn quyền" : "Sinh viên"}</small></span>{onLogout && <button type="button" className="logout-link" onClick={onLogout}>Đăng xuất</button>}<MoreHorizontal size={18} /></div></div></aside>
+  return (
+    <aside className="sidebar">
+      <Brand />
+      <div className="side-label">KHÔNG GIAN CỦA BẠN</div>
+      <nav className="side-nav" aria-label="Điều hướng chính">
+        {visibleNav.map(([id, label, Icon]) => (
+          <a key={id} href={`#/${id}`} onClick={() => go(id)} className={`nav-link ${page === id ? "active" : ""}`}>
+            <Icon size={18} />
+            <span>{label}</span>
+            {id === "calendar" && <span className="nav-count">6</span>}
+          </a>
+        ))}
+      </nav>
+      <div className="semester-card">
+        <div className="sem-top">
+          <span className="live-dot" /> HỌC KỲ HIỆN TẠI
+        </div>
+        <b>Học kỳ 1 · 2025–2026</b>
+        <span>Đại học Duy Tân</span>
+        <div className="semester-progress"><i /></div>
+        <small>Tuần 8 trên 15</small>
+      </div>
+      <div className="sidebar-bottom">
+        <a className="nav-link" href="#/help"><CircleHelp size={18} />Trợ giúp & hướng dẫn</a>
+        <div className="profile-mini">
+          <span className="avatar-initial">{initial}</span>
+          <span>
+            <b>{userName}</b>
+            <small>{user?.is_admin ? "Quản trị viên (Admin)" : "Sinh viên"}</small>
+          </span>
+          {onLogout && <button type="button" className="logout-link" onClick={onLogout}>Đăng xuất</button>}
+          <MoreHorizontal size={18} />
+        </div>
+      </div>
+    </aside>
+  );
 }
 
 export function Topbar({ title, user, onLogout }) {

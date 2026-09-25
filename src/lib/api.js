@@ -1,18 +1,7 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
 const AUTH_KEY = "lichhoc_access_token";
+const REFRESH_KEY = "lichhoc_refresh_token";
 const USER_KEY = "lichhoc_user";
-
-export const demoAdminCredentials = {
-  email: import.meta.env.VITE_DEMO_ADMIN_EMAIL || "admin@lichhoc.local",
-  password: import.meta.env.VITE_DEMO_ADMIN_PASSWORD || "Admin123!",
-};
-
-export function isDemoAdminLogin(email, password) {
-  return (
-    String(email || "").trim().toLowerCase() === demoAdminCredentials.email.toLowerCase() &&
-    String(password || "") === demoAdminCredentials.password
-  );
-}
 
 export function getAuthToken() {
   return localStorage.getItem(AUTH_KEY) || "";
@@ -24,6 +13,18 @@ export function setAuthToken(token) {
     return;
   }
   localStorage.removeItem(AUTH_KEY);
+}
+
+export function getRefreshToken() {
+  return localStorage.getItem(REFRESH_KEY) || "";
+}
+
+export function setRefreshToken(token) {
+  if (token) {
+    localStorage.setItem(REFRESH_KEY, token);
+    return;
+  }
+  localStorage.removeItem(REFRESH_KEY);
 }
 
 export function getCurrentUser() {
@@ -44,11 +45,62 @@ export function setCurrentUser(user) {
 
 export function clearAuth() {
   localStorage.removeItem(AUTH_KEY);
+  localStorage.removeItem(REFRESH_KEY);
   localStorage.removeItem(USER_KEY);
 }
 
+// Cơ chế tự động làm mới access token
+let isRefreshing = false;
+let refreshSubscribers = [];
+
+function subscribeTokenRefresh(cb) {
+  refreshSubscribers.push(cb);
+}
+
+function onTokenRefreshed(newToken) {
+  refreshSubscribers.forEach((cb) => cb(newToken));
+  refreshSubscribers = [];
+}
+
+export async function refreshAccessToken() {
+  const refreshToken = getRefreshToken();
+  if (!refreshToken) {
+    return null;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/auth/refresh`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    });
+
+    if (!res.ok) {
+      clearAuth();
+      return null;
+    }
+
+    const data = await res.json();
+    if (data.access_token) {
+      setAuthToken(data.access_token);
+      if (data.user) {
+        setCurrentUser(data.user);
+      }
+      return data.access_token;
+    }
+
+    clearAuth();
+    return null;
+  } catch {
+    clearAuth();
+    return null;
+  }
+}
+
 async function apiRequest(path, options = {}) {
-  const token = getAuthToken();
+  let token = getAuthToken();
   const headers = { ...(options.headers || {}) };
 
   if (!(options.body instanceof FormData) && !headers["Content-Type"] && options.body) {
@@ -59,10 +111,55 @@ async function apiRequest(path, options = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+    });
+  } catch (netErr) {
+    const error = new Error("Lỗi kết nối API. Vui lòng kiểm tra lại dịch vụ máy chủ.");
+    error.status = 0;
+    error.code = "API_ERROR";
+    throw error;
+  }
+
+  // Nếu gặp lỗi 401 (Token hết hạn), tự động dùng refresh_token lấy token mới và retry
+  if (response.status === 401 && !path.startsWith("/api/auth/login") && !path.startsWith("/api/auth/refresh")) {
+    const refreshToken = getRefreshToken();
+    if (refreshToken) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        const newToken = await refreshAccessToken();
+        isRefreshing = false;
+
+        if (newToken) {
+          onTokenRefreshed(newToken);
+          const retryHeaders = { ...(options.headers || {}), Authorization: `Bearer ${newToken}` };
+          if (!(options.body instanceof FormData) && !retryHeaders["Content-Type"] && options.body) {
+            retryHeaders["Content-Type"] = "application/json";
+          }
+          response = await fetch(`${API_BASE_URL}${path}`, {
+            ...options,
+            headers: retryHeaders,
+          });
+        }
+      } else {
+        // Chờ token mới khi một tiến trình khác đang refresh
+        const newToken = await new Promise((resolve) => subscribeTokenRefresh(resolve));
+        if (newToken) {
+          const retryHeaders = { ...(options.headers || {}), Authorization: `Bearer ${newToken}` };
+          if (!(options.body instanceof FormData) && !retryHeaders["Content-Type"] && options.body) {
+            retryHeaders["Content-Type"] = "application/json";
+          }
+          response = await fetch(`${API_BASE_URL}${path}`, {
+            ...options,
+            headers: retryHeaders,
+          });
+        }
+      }
+    }
+  }
 
   const text = await response.text();
   let data = {};
@@ -75,51 +172,62 @@ async function apiRequest(path, options = {}) {
   }
 
   if (!response.ok) {
-    throw new Error(data.error || data.message || "Có lỗi xảy ra khi gọi API.");
+    const error = new Error(data.error || data.message || `Lỗi máy chủ phản hồi mã ${response.status}`);
+    error.status = response.status;
+    error.data = data;
+    throw error;
   }
 
   return data;
 }
 
-export async function registerUser({ email, password, is_admin = false }) {
+export async function registerUser({ email, password, name = "", is_admin = false }) {
   return apiRequest("/api/auth/register", {
     method: "POST",
-    body: JSON.stringify({ email, password, is_admin }),
+    body: JSON.stringify({ email, password, name, is_admin }),
   });
 }
 
-export async function loginUser({ email, password }) {
-  try {
-    const data = await apiRequest("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({ email, password }),
-    });
+export async function loginUser({ email, password, remember_me = false }) {
+  const data = await apiRequest("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password, remember_me }),
+  });
 
-    if (data.access_token) {
-      setAuthToken(data.access_token);
-      setCurrentUser(data.user || null);
+  if (data.access_token) {
+    setAuthToken(data.access_token);
+    setCurrentUser(data.user || null);
+
+    // Chỉ lưu refresh_token khi người dùng chọn remember_me
+    if (data.refresh_token && remember_me) {
+      setRefreshToken(data.refresh_token);
+    } else {
+      setRefreshToken(null);
     }
-
-    return data;
-  } catch (error) {
-    if (isDemoAdminLogin(email, password)) {
-      const mockUser = {
-        id: 1,
-        email: demoAdminCredentials.email,
-        is_admin: true,
-        created_at: new Date().toISOString(),
-      };
-      setAuthToken("demo-admin-token");
-      setCurrentUser(mockUser);
-      return {
-        message: "Đăng nhập thành công (demo admin)",
-        access_token: "demo-admin-token",
-        user: mockUser,
-      };
-    }
-
-    throw error;
   }
+
+  return data;
+}
+
+export async function updateUserProfile({ name, email, password }) {
+  const data = await apiRequest("/api/auth/profile", {
+    method: "PUT",
+    body: JSON.stringify({ name, email, password }),
+  });
+
+  if (data.user) {
+    setCurrentUser(data.user);
+  }
+
+  return data;
+}
+
+export async function getUserProfile() {
+  const data = await apiRequest("/api/auth/me", { method: "GET" });
+  if (data.user) {
+    setCurrentUser(data.user);
+  }
+  return data.user;
 }
 
 export async function parseScheduleHtml(htmlString) {
@@ -199,7 +307,31 @@ export async function deleteAdminSchedule(scheduleId) {
 }
 
 export async function deleteUser(userId) {
-  return apiRequest(`/admin/user/${userId}`, { method: "DELETE" });
+  return apiRequest(`/api/admin/users/${userId}`, { method: "DELETE" });
+}
+
+export async function deleteAdminUser(userId) {
+  return apiRequest(`/api/admin/users/${userId}`, { method: "DELETE" });
+}
+
+export async function getAdminUsers(searchQuery = "") {
+  const q = searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : "";
+  return apiRequest(`/api/admin/users${q}`, { method: "GET" });
+}
+
+export async function updateUserRole(userId, isAdmin) {
+  return apiRequest(`/api/admin/users/${userId}/role`, {
+    method: "PUT",
+    body: JSON.stringify({ is_admin: isAdmin }),
+  });
+}
+
+export async function getAdminActivityLogs(limit = 100) {
+  return apiRequest(`/api/admin/logs?limit=${limit}`, { method: "GET" });
+}
+
+export async function getAdminStats() {
+  return apiRequest("/api/admin/stats", { method: "GET" });
 }
 
 export async function updateCourseById(courseId, payload) {
@@ -227,12 +359,20 @@ export function formatCourseFromEvent(event, index) {
   return {
     id: event.id,
     day: dayText,
+    dayIndex: Number(event.dayIndex ?? 0),
+    dayName: dayText,
+    startTime: event.startTime || "07:00",
+    endTime: event.endTime || "09:00",
     date: `Tuần ${index + 1}`,
-    time: `${event.startTime} – ${event.endTime}`,
+    time: `${event.startTime || "07:00"} – ${event.endTime || "09:00"}`,
     name: event.subject || "Lịch học",
+    subject: event.subject || "Lịch học",
     code: event.classCode || `LS${index + 1}`,
+    classCode: event.classCode || `LS${index + 1}`,
     room: event.room || (event.isOnline ? "Online" : "Phòng học"),
+    location: event.location || "",
     teacher: event.location || "Đã đồng bộ từ API",
+    isOnline: Boolean(event.isOnline),
     tone: event.isOnline ? "mint" : "blue",
     status: "Đã đồng bộ",
   };

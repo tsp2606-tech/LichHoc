@@ -4,6 +4,7 @@ import { PageHeading, Button, Badge } from "../components/AppShell";
 import { Stat } from "../components/Display";
 import { classes } from "../data/mockSchedule";
 import { deleteCourseById, formatCourseFromEvent, getCurrentUser, getMySchedule, updateCourseById } from "../lib/api";
+import { ErrorDialog } from "../components/ErrorDialog";
 
 export function ManagePage() {
   const [courses, setCourses] = useState(classes);
@@ -11,6 +12,8 @@ export function ManagePage() {
   const [draft, setDraft] = useState({ name: "", room: "", teacher: "", time: "", day: "" });
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [errorDialog, setErrorDialog] = useState(null);
+
 
   const loadCourses = async () => {
     try {
@@ -69,7 +72,14 @@ export function ManagePage() {
       setNotice("Đã cập nhật môn học thành công.");
       setError("");
     } catch (err) {
-      setError(err.message || "Không thể cập nhật môn học.");
+      const errMsg = err.message || "Không thể cập nhật môn học.";
+      setError(errMsg);
+      setErrorDialog({
+        title: "Cập nhật môn học thất bại",
+        message: errMsg,
+        code: err.status ? `HTTP_${err.status}` : "UPDATE_ERROR",
+        type: "error",
+      });
     }
   };
 
@@ -89,7 +99,14 @@ export function ManagePage() {
       setNotice("Đã xóa môn học khỏi danh sách.");
       setError("");
     } catch (err) {
-      setError(err.message || "Không thể xóa môn học.");
+      const errMsg = err.message || "Không thể xóa môn học.";
+      setError(errMsg);
+      setErrorDialog({
+        title: "Xóa môn học thất bại",
+        message: errMsg,
+        code: err.status ? `HTTP_${err.status}` : "DELETE_ERROR",
+        type: "error",
+      });
     }
   };
 
@@ -172,6 +189,15 @@ export function ManagePage() {
         </div>
         <div className="table-footer">Hiển thị <b>1–{courses.length}</b> trong <b>{courses.length}</b> lớp học <div><button>‹</button><button className="current-page">1</button><button>›</button></div></div>
       </section>
+
+      <ErrorDialog
+        isOpen={Boolean(errorDialog)}
+        title={errorDialog?.title}
+        message={errorDialog?.message}
+        code={errorDialog?.code}
+        type={errorDialog?.type || "error"}
+        onClose={() => setErrorDialog(null)}
+      />
     </>
   );
 }

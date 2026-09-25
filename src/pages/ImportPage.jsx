@@ -1,7 +1,8 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Code2, Upload, Check, ArrowUpRight } from "lucide-react";
 import { PageHeading, Button } from "../components/AppShell";
 import { parseScheduleHtml, saveSchedule } from "../lib/api";
+import { ErrorDialog } from "../components/ErrorDialog";
 
 export function ImportPage() {
   const [html, setHtml] = useState("");
@@ -9,16 +10,25 @@ export function ImportPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [count, setCount] = useState(0);
+  const [errorDialog, setErrorDialog] = useState(null);
 
   const handleAnalyze = async () => {
     if (!html.trim()) {
-      setError("Vui lòng dán mã HTML thời khóa biểu trước khi đồng bộ.");
+      const msg = "Vui lòng dán mã HTML thời khóa biểu trước khi đồng bộ.";
+      setError(msg);
+      setErrorDialog({
+        title: "Thiếu mã HTML",
+        message: msg,
+        code: "HTML_REQUIRED",
+        type: "warning",
+      });
       return;
     }
 
     setLoading(true);
     setError("");
     setMessage("");
+    setErrorDialog(null);
 
     try {
       const parsed = await parseScheduleHtml(html);
@@ -33,7 +43,14 @@ export function ImportPage() {
         setMessage(`Phân tích thành công ${events.length} tiết học. Hãy đăng nhập để lưu vào tài khoản.`);
       }
     } catch (err) {
-      setError(err.message || "Không thể đồng bộ lịch học.");
+      const errMsg = err.message || "Không thể đồng bộ lịch học từ mã HTML đã cung cấp.";
+      setError(errMsg);
+      setErrorDialog({
+        title: "Phân tích lịch học thất bại",
+        message: errMsg,
+        code: err.status ? `HTTP_${err.status}` : "PARSE_ERROR",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -113,6 +130,15 @@ export function ImportPage() {
           </div>
         </div>
       </section>
+
+      <ErrorDialog
+        isOpen={Boolean(errorDialog)}
+        title={errorDialog?.title}
+        message={errorDialog?.message}
+        code={errorDialog?.code}
+        type={errorDialog?.type || "error"}
+        onClose={() => setErrorDialog(null)}
+      />
     </>
   );
 }

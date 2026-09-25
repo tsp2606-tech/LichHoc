@@ -1,18 +1,26 @@
 import { useEffect, useState } from "react";
 import { CalendarDays, ArrowUpRight } from "lucide-react";
 import { Brand, Badge, Button } from "../components/AppShell";
-import { demoAdminCredentials, loginUser, registerUser } from "../lib/api";
+import { loginUser, registerUser } from "../lib/api";
+import { ErrorDialog } from "../components/ErrorDialog";
 
 export function AuthPage({ mode, go }) {
   const register = mode === "register";
-  const [form, setForm] = useState({ name: "", email: demoAdminCredentials.email, password: demoAdminCredentials.password, confirmPassword: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [errorDialog, setErrorDialog] = useState(null); // { title, message, code, type }
 
   useEffect(() => {
-    if (!register) {
-      setForm((prev) => ({ ...prev, email: demoAdminCredentials.email, password: demoAdminCredentials.password }));
-    }
+    setError("");
+    setErrorDialog(null);
+    setForm({ name: "", email: "", password: "", confirmPassword: "" });
   }, [register]);
 
   const handleChange = (event) => {
@@ -23,15 +31,60 @@ export function AuthPage({ mode, go }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+    setErrorDialog(null);
 
-    if (!form.email || !form.password) {
-      setError("Vui lòng nhập email và mật khẩu.");
+    const emailTrim = form.email.trim();
+    const passwordTrim = form.password;
+
+    if (!emailTrim || !passwordTrim) {
+      const msg = "Vui lòng nhập đầy đủ Email sinh viên và Mật khẩu để tiếp tục.";
+      setError(msg);
+      setErrorDialog({
+        title: register ? "Thiếu thông tin đăng ký" : "Thiếu thông tin đăng nhập",
+        message: msg,
+        code: "VALIDATION_EMPTY_FIELDS",
+        type: "warning",
+      });
       return;
     }
 
-    if (register && form.password !== form.confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp.");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailTrim)) {
+      const msg = "Địa chỉ email không đúng định dạng. Vui lòng nhập email hợp lệ (ví dụ: student@example.com hoặc student@duytan.edu.vn).";
+      setError(msg);
+      setErrorDialog({
+        title: "Email không đúng định dạng",
+        message: msg,
+        code: "INVALID_EMAIL",
+        type: "warning",
+      });
       return;
+    }
+
+    if (register) {
+      if (form.password.length < 6) {
+        const msg = "Mật khẩu phải có độ dài tối thiểu từ 6 ký tự trở lên để đảm bảo an toàn cho tài khoản.";
+        setError(msg);
+        setErrorDialog({
+          title: "Mật khẩu quá ngắn",
+          message: msg,
+          code: "PASSWORD_TOO_SHORT",
+          type: "warning",
+        });
+        return;
+      }
+
+      if (form.password !== form.confirmPassword) {
+        const msg = "Mật khẩu xác nhận không khớp với mật khẩu đã nhập. Vui lòng kiểm tra lại thật kỹ.";
+        setError(msg);
+        setErrorDialog({
+          title: "Mật khẩu xác nhận không khớp",
+          message: msg,
+          code: "PASSWORD_MISMATCH",
+          type: "warning",
+        });
+        return;
+      }
     }
 
     setLoading(true);
@@ -39,14 +92,16 @@ export function AuthPage({ mode, go }) {
     try {
       if (register) {
         await registerUser({
-          email: form.email,
+          email: emailTrim,
           password: form.password,
+          name: form.name.trim(),
           is_admin: false,
         });
 
         const loginResult = await loginUser({
-          email: form.email,
+          email: emailTrim,
           password: form.password,
+          remember_me: rememberMe,
         });
 
         if (loginResult.access_token) {
@@ -54,8 +109,9 @@ export function AuthPage({ mode, go }) {
         }
       } else {
         const result = await loginUser({
-          email: form.email,
+          email: emailTrim,
           password: form.password,
+          remember_me: rememberMe,
         });
 
         if (result.access_token) {
@@ -63,7 +119,14 @@ export function AuthPage({ mode, go }) {
         }
       }
     } catch (err) {
-      setError(err.message || "Không thể kết nối tới API.");
+      const errMsg = err.message || (register ? "Không thể hoàn tất đăng ký tài khoản." : "Email hoặc mật khẩu không chính xác.");
+      setError(errMsg);
+      setErrorDialog({
+        title: register ? "Đăng ký không thành công" : "Đăng nhập không thành công",
+        message: errMsg,
+        code: err.status ? `HTTP_${err.status}` : "AUTH_FAILED",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -113,10 +176,14 @@ export function AuthPage({ mode, go }) {
           )}
 
           {!register && (
-            <div className="auth-options">
-              <label><input type="checkbox" /> Ghi nhớ đăng nhập</label>
-              <a href="#/login">Quên mật khẩu?</a>
-            </div>
+              <label style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <span>Ghi nhớ đăng nhập (Remember me)</span>
+              </label>
           )}
 
           {error && <div className="error-banner">{error}</div>}
@@ -125,22 +192,34 @@ export function AuthPage({ mode, go }) {
             {loading ? (register ? "Đang tạo tài khoản..." : "Đang đăng nhập...") : register ? "Tạo tài khoản miễn phí" : "Đăng nhập"} <ArrowUpRight size={16} />
           </Button>
 
-          {!register && (
-            <div className="demo-user-box">
-              <strong>Tài khoản demo admin:</strong>
-              <span>{demoAdminCredentials.email} / {demoAdminCredentials.password}</span>
-            </div>
-          )}
-
           <div className="auth-switch">
-            {register ? "Đã có tài khoản?" : "Chưa có tài khoản?"} <a href={`#/${register ? "login" : "register"}`} onClick={() => go(register ? "login" : "register")}>{register ? "Đăng nhập" : "Đăng ký miễn phí"}</a>
+            {register ? "Đã có tài khoản?" : "Chưa có tài khoản?"}{" "}
+            <a
+              href={`#/${register ? "login" : "register"}`}
+              onClick={(e) => {
+                e.preventDefault();
+                go(register ? "login" : "register");
+              }}
+            >
+              {register ? "Đăng nhập" : "Đăng ký miễn phí"}
+            </a>
           </div>
 
           <div className="auth-terms">Bằng cách tiếp tục, bạn đồng ý với <a href="#terms">Điều khoản sử dụng</a> và <a href="#privacy">Chính sách bảo mật</a>.</div>
         </form>
       </section>
+
+      <ErrorDialog
+        isOpen={Boolean(errorDialog)}
+        title={errorDialog?.title}
+        message={errorDialog?.message}
+        code={errorDialog?.code}
+        type={errorDialog?.type || "error"}
+        onClose={() => setErrorDialog(null)}
+      />
     </main>
   );
 }
 
 export default AuthPage;
+
