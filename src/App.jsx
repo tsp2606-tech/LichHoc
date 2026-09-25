@@ -12,7 +12,11 @@ import { clearAuth, getAuthToken, getCurrentUser } from "./lib/api";
 const protectedPages = new Set(["calendar", "import", "manage", "admin", "settings"]);
 
 function App() {
-  const readPage = () => location.hash.replace(/^#\/?/, "") || "calendar";
+  const readPage = () => {
+    const raw = location.hash.replace(/^#\/?/, "");
+    const pageName = raw.split("?")[0].replace(/^\//, "");
+    return pageName || "calendar";
+  };
   const [page, setPage] = useState(readPage);
   const [user, setUser] = useState(getCurrentUser());
 

@@ -221,10 +221,20 @@ export function SettingsPage() {
             )}
 
             <div className="avatar-edit" style={{ marginTop: "14px" }}>
-              <span className="avatar-large">{avatarInitial}</span>
+              {currentUser?.avatar ? (
+                <img src={currentUser.avatar} alt={userName} className="avatar-large avatar-img" />
+              ) : (
+                <span className="avatar-large">{avatarInitial}</span>
+              )}
               <span>
                 <b>{userName}</b>
-                <small>{currentUser?.is_admin ? "Quản trị viên (Admin)" : "Sinh viên"}</small>
+                <small>
+                  {currentUser?.is_admin
+                    ? "Quản trị viên (Admin)"
+                    : currentUser?.auth_type === "google"
+                    ? "Sinh viên · Tài khoản Google"
+                    : "Sinh viên"}
+                </small>
               </span>
             </div>
 

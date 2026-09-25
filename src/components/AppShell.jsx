@@ -39,7 +39,11 @@ export function Sidebar({ page, go, user, onLogout }) {
       <div className="sidebar-bottom">
         <a className="nav-link" href="#/help"><CircleHelp size={18} />Trợ giúp & hướng dẫn</a>
         <div className="profile-mini">
-          <span className="avatar-initial">{initial}</span>
+          {user?.avatar ? (
+            <img src={user.avatar} alt={userName} className="avatar-img" />
+          ) : (
+            <span className="avatar-initial">{initial}</span>
+          )}
           <span>
             <b>{userName}</b>
             <small>{user?.is_admin ? "Quản trị viên (Admin)" : "Sinh viên"}</small>
@@ -105,7 +109,15 @@ export function Topbar({ title, user, onLogout }) {
           )}
         </div>
         <span className="top-divider" />
-        <button className="user-chip" type="button"><span className="avatar-initial">{userName.charAt(0).toUpperCase()}</span><span>{userName}</span><ChevronDown size={15} /></button>
+        <button className="user-chip" type="button">
+          {user?.avatar ? (
+            <img src={user.avatar} alt={userName} className="avatar-img-chip" />
+          ) : (
+            <span className="avatar-initial">{userName.charAt(0).toUpperCase()}</span>
+          )}
+          <span>{userName}</span>
+          <ChevronDown size={15} />
+        </button>
         {onLogout && <button type="button" className="button outline" onClick={onLogout}>Đăng xuất</button>}
       </div>
     </header>

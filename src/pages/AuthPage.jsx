@@ -3,6 +3,7 @@ import { CalendarDays, ArrowUpRight } from "lucide-react";
 import { Brand, Badge, Button } from "../components/AppShell";
 import { loginUser, registerUser } from "../lib/api";
 import { ErrorDialog } from "../components/ErrorDialog";
+import { GoogleLoginButton } from "../components/GoogleLoginButton";
 
 export function AuthPage({ mode, go }) {
   const register = mode === "register";
@@ -132,6 +133,93 @@ export function AuthPage({ mode, go }) {
     }
   };
 
+  const isExtension =
+    window.location.search.includes("source=extension") ||
+    window.location.hash.includes("source=extension") ||
+    window.location.search.includes("ext=1") ||
+    window.location.hash.includes("ext=1");
+
+  const isAutoGoogle =
+    window.location.search.includes("action=google") ||
+    window.location.hash.includes("action=google") ||
+    window.location.search.includes("auth=g") ||
+    window.location.hash.includes("auth=g");
+
+  useEffect(() => {
+    if (isExtension && isAutoGoogle) {
+      const timer = setTimeout(() => {
+        const btn = document.querySelector(".btn-google-login");
+        if (btn) {
+          btn.click();
+        }
+      }, 350);
+      return () => clearTimeout(timer);
+    }
+  }, [isExtension, isAutoGoogle]);
+
+  const handleGoogleSuccess = (res) => {
+    if (isExtension) {
+      setTimeout(() => {
+        try {
+          window.close();
+        } catch {
+          go("calendar");
+        }
+      }, 500);
+      return;
+    }
+    go("calendar");
+  };
+
+  const handleGoogleError = (errMsg, errCode) => {
+    setError(errMsg);
+    setErrorDialog({
+      title: "Đăng nhập Google thất bại",
+      message: errMsg,
+      code: errCode || "GOOGLE_AUTH_FAILED",
+      type: "error",
+    });
+  };
+
+  if (isExtension) {
+    return (
+      <main className="extension-auth-layout">
+        <div className="extension-auth-card">
+          <div className="extension-brand-row">
+            <span style={{ fontSize: "28px" }}>📅</span>
+            <h2>LichHoc DTU</h2>
+          </div>
+          <p className="extension-auth-desc">
+            Xác thực tài khoản Google để tự động đồng bộ lịch học với Tiện ích Extension.
+          </p>
+
+          {error && <div className="error-banner">{error}</div>}
+
+          <div style={{ marginTop: "18px", marginBottom: "16px" }}>
+            <GoogleLoginButton
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              text="Đăng nhập ngay bằng Google"
+            />
+          </div>
+
+          <div className="extension-auth-footer">
+            <small>Sau khi đăng nhập thành công, cửa sổ này sẽ tự động đóng lại.</small>
+          </div>
+        </div>
+
+        <ErrorDialog
+          isOpen={Boolean(errorDialog)}
+          title={errorDialog?.title}
+          message={errorDialog?.message}
+          code={errorDialog?.code}
+          type={errorDialog?.type || "error"}
+          onClose={() => setErrorDialog(null)}
+        />
+      </main>
+    );
+  }
+
   return (
     <main className="auth-layout">
       <section className="auth-art">
@@ -191,6 +279,17 @@ export function AuthPage({ mode, go }) {
           <Button type="submit" disabled={loading}>
             {loading ? (register ? "Đang tạo tài khoản..." : "Đang đăng nhập...") : register ? "Tạo tài khoản miễn phí" : "Đăng nhập"} <ArrowUpRight size={16} />
           </Button>
+
+          <div className="auth-divider">
+            <span>hoặc</span>
+          </div>
+
+          <GoogleLoginButton
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            text={register ? "Đăng ký nhanh bằng Google" : "Đăng nhập bằng Google"}
+            disabled={loading}
+          />
 
           <div className="auth-switch">
             {register ? "Đã có tài khoản?" : "Chưa có tài khoản?"}{" "}

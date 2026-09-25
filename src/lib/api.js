@@ -211,6 +211,24 @@ export async function loginUser({ email, password, remember_me = false }) {
   return data;
 }
 
+export async function googleLoginApi({ idToken, userInfo }) {
+  const data = await apiRequest("/api/auth/google-login", {
+    method: "POST",
+    body: JSON.stringify({ idToken, userInfo }),
+  });
+
+  if (data.access_token) {
+    setAuthToken(data.access_token);
+    setCurrentUser(data.user || null);
+
+    if (data.refresh_token) {
+      setRefreshToken(data.refresh_token);
+    }
+  }
+
+  return data;
+}
+
 export async function updateUserProfile({ name, email, password }) {
   const data = await apiRequest("/api/auth/profile", {
     method: "PUT",
