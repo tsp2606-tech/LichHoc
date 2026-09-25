@@ -3257,3 +3257,145 @@ td svg {
   font-size: 12px;
   color: #94a3b8;
 }
+.help-page {
+  display: grid;
+  gap: 18px;
+  max-width: 900px;
+}
+
+.help-heading,
+.help-extension-copy {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.help-heading h1 {
+  margin: 0;
+  color: #1c2b48;
+  font-size: 25px;
+  letter-spacing: -.6px;
+}
+
+.help-heading p:last-child {
+  margin: 5px 0 0;
+  color: #818ba0;
+  font-size: 12px;
+}
+
+.help-heading .eyebrow {
+  color: #71809b;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .08em;
+}
+
+.help-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  place-items: center;
+  border-radius: 10px;
+  background: #edf0ff;
+  color: #3154e6;
+}
+
+.help-extension {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px;
+}
+
+.help-extension-icon {
+  background: #eef4ff;
+}
+
+.help-extension h2,
+.help-install h2 {
+  margin: 0;
+  color: #2d3b57;
+  font-size: 15px;
+}
+
+.help-extension p {
+  margin: 5px 0 0;
+  color: #818ba0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.help-download {
+  min-height: 40px;
+  padding: 10px 15px;
+  font-size: 12px;
+}
+
+.help-install {
+  padding: 20px;
+}
+
+.help-install ol {
+  display: grid;
+  gap: 16px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: install-step;
+}
+
+.help-install li {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  padding-left: 34px;
+  counter-increment: install-step;
+}
+
+.help-install li::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  border-radius: 50%;
+  background: #f0f2ff;
+  color: #3855db;
+  content: counter(install-step);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.help-install li b {
+  color: #46536d;
+  font-size: 12px;
+}
+
+.help-install li span {
+  color: #818ba0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.help-install code {
+  border-radius: 4px;
+  background: #f3f5fa;
+  padding: 2px 5px;
+  color: #44516b;
+  font-size: 11px;
+}
+
+@media (max-width: 640px) {
+  .help-extension {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .help-download {
+    align-self: flex-start;
+  }
+}

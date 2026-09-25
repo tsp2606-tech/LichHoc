@@ -7,6 +7,7 @@ import AdminPage from "./pages/AdminPage";
 import SettingsPage from "./pages/SettingsPage";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
+import HelpPage from "./pages/HelpPage";
 import { clearAuth, getAuthToken, getCurrentUser } from "./lib/api";
 
 const protectedPages = new Set(["calendar", "import", "manage", "admin", "settings"]);
@@ -58,8 +59,8 @@ function App() {
   if (page === "home") return <LandingPage go={go} />;
   if (page === "login" || page === "register") return <AuthPage mode={page} go={go} />;
 
-  const titles = { calendar: "Lịch của tôi", import: "Nhập lịch HTML", manage: "Quản lý lịch học", admin: "Quản trị viên", settings: "Cài đặt & kết nối" };
-  const pages = { calendar: <CalendarPage />, import: <ImportPage />, manage: <ManagePage />, admin: <AdminPage />, settings: <SettingsPage /> };
+  const titles = { calendar: "Lịch của tôi", import: "Nhập lịch HTML", manage: "Quản lý lịch học", admin: "Quản trị viên", settings: "Cài đặt & kết nối", help: "Trợ giúp & hướng dẫn" };
+  const pages = { calendar: <CalendarPage />, import: <ImportPage />, manage: <ManagePage />, admin: <AdminPage />, settings: <SettingsPage />, help: <HelpPage /> };
 
   return (
     <div className="app-shell">
