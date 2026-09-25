@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Plus, BookOpen, Clock3, Activity, RefreshCw, MapPin } from "lucide-react";
 import { PageHeading, Button } from "../components/AppShell";
 import { Stat } from "../components/Display";
@@ -68,33 +68,18 @@ export function CalendarPage() {
 
   const now = new Date(); // Thời gian thực tế hệ thống
 
-  // Tuần duy nhất hiện đang có lịch học (chỉ duy nhất tuần này hiển thị lịch)
-  const [activeWeekMonday, setActiveWeekMonday] = useState(() => {
-    const saved = localStorage.getItem("lichhoc_active_week_monday");
-    const currentRealMonday = getMonday(new Date());
+  // 1. Xác định Thứ Hai của tuần thực tế hiện tại (Tuần của ngày hôm nay)
+  const currentRealMonday = useMemo(() => getMonday(now), [now]);
 
-    if (saved) {
-      const savedDate = new Date(saved);
-      if (!isNaN(savedDate.getTime())) {
-        // Khi thời gian thực tế đã qua tuần mới hơn tuần đã lưu -> xóa lịch tuần cũ và chuyển sang tuần mới
-        if (currentRealMonday.getTime() > savedDate.getTime()) {
-          const key = formatDateKey(currentRealMonday);
-          localStorage.setItem("lichhoc_active_week_monday", key);
-          return currentRealMonday;
-        }
-        return getMonday(savedDate);
-      }
-    }
-    const key = formatDateKey(currentRealMonday);
-    localStorage.setItem("lichhoc_active_week_monday", key);
-    return currentRealMonday;
-  });
+  // 2. Xác định Thứ Hai của tuần trước tuần hiện tại (Tuần trước - Được giữ lại)
+  const prevRealMonday = useMemo(() => {
+    const m = new Date(currentRealMonday);
+    m.setDate(currentRealMonday.getDate() - 7);
+    return m;
+  }, [currentRealMonday]);
 
-  const updateActiveWeek = (targetDate) => {
-    const targetM = getMonday(targetDate);
-    setActiveWeekMonday(targetM);
-    localStorage.setItem("lichhoc_active_week_monday", formatDateKey(targetM));
-  };
+  // Tuần được chỉ định cụ thể khi bấm từ chế độ xem Tháng (nếu có)
+  const [selectedMonthWeek, setSelectedMonthWeek] = useState(null);
 
   // Tính ngày Thứ Hai của tuần đang chọn trên lịch
   const currentDayOfWeek = currentDate.getDay(); // 0 là CN, 1 là T2...
@@ -112,14 +97,37 @@ export function CalendarPage() {
     return s;
   }, [monday]);
 
-  // Kiểm tra xem tuần đang xem có phải là tuần duy nhất có lịch hay không
+  // Hàm kiểm tra một tuần có hiển thị lịch hay không:
+  // - Nếu chưa qua tuần mới: Tuần hiện tại KHÔNG bị xóa và GIỮ LẠI tuần trước của tuần hiện tại.
+  // - Các tuần cũ hơn tuần trước sẽ bị xóa (để trống).
+  // - Các tuần tương lai khi bấm tiến qua tuần sẽ để trống (không tự động nhân bản môn học tuần cũ).
+  // - Khi người dùng bấm vào ngày trong chế độ xem Tháng thì hiển thị lịch duy nhất cho tuần chứa ngày đó.
+  const checkWeekHasSchedule = useCallback(
+    (monDate) => {
+      if (!monDate) return false;
+      const targetKey = formatDateKey(monDate);
+
+      // Ưu tiên tuần được click từ chế độ xem Tháng
+      if (selectedMonthWeek) {
+        return targetKey === formatDateKey(selectedMonthWeek);
+      }
+
+      // Mặc định: Giữ lại tuần hiện tại và tuần trước của tuần hiện tại
+      const currentKey = formatDateKey(currentRealMonday);
+      const prevKey = formatDateKey(prevRealMonday);
+      return targetKey === currentKey || targetKey === prevKey;
+    },
+    [selectedMonthWeek, currentRealMonday, prevRealMonday]
+  );
+
+  // Kiểm tra xem tuần đang xem trên màn hình có hiển thị lịch học hay không
   const isCurrentViewActiveWeek = useMemo(() => {
-    if (!activeWeekMonday || !monday) return false;
-    return formatDateKey(monday) === formatDateKey(activeWeekMonday);
-  }, [monday, activeWeekMonday]);
+    return checkWeekHasSchedule(monday);
+  }, [checkWeekHasSchedule, monday]);
 
   // Các nút chuyển lùi / tiến / hôm nay
   const handlePrev = () => {
+    setSelectedMonthWeek(null);
     setCurrentDate((prev) => {
       const next = new Date(prev);
       if (viewMode === "month") {
@@ -132,23 +140,21 @@ export function CalendarPage() {
   };
 
   const handleNext = () => {
+    setSelectedMonthWeek(null);
     setCurrentDate((prev) => {
       const next = new Date(prev);
       if (viewMode === "month") {
         next.setMonth(next.getMonth() + 1);
       } else {
         next.setDate(next.getDate() + 7);
-        // Khi qua tuần mới thì xóa lịch của tuần trước đi, chuyển tuần duy nhất có lịch sang tuần mới
-        updateActiveWeek(next);
       }
       return next;
     });
   };
 
   const handleToday = () => {
-    const today = new Date();
-    setCurrentDate(today);
-    updateActiveWeek(today);
+    setSelectedMonthWeek(null);
+    setCurrentDate(new Date());
   };
 
   const weekDays = useMemo(() => {
@@ -281,7 +287,8 @@ export function CalendarPage() {
       const schedule = await getMySchedule();
       const formatted = schedule.map((event, index) => formatCourseFromEvent(event, index));
       setApiCourses(formatted);
-      updateActiveWeek(new Date());
+      setSelectedMonthWeek(null);
+      setCurrentDate(new Date());
       setSyncSuccess(true);
       setSyncMessage(`Đồng bộ thành công! Đã tải về ${schedule.length} môn học từ máy chủ.`);
     } catch (err) {
@@ -396,10 +403,19 @@ export function CalendarPage() {
     const fmt = (d) => `${d.getDate().toString().padStart(2, "0")}/${(d.getMonth() + 1).toString().padStart(2, "0")}/${d.getFullYear()}`;
     const baseWeekText = `Tuần: ${fmt(monday)} - ${fmt(sunday)}`;
     if (!isCurrentViewActiveWeek) {
+      if (monday.getTime() > currentRealMonday.getTime()) {
+        return `${baseWeekText} · (Tuần tương lai - Chưa có lịch học)`;
+      }
       return `${baseWeekText} · (Tuần trống - Lịch tuần cũ đã được xóa)`;
     }
+    if (formatDateKey(monday) === formatDateKey(currentRealMonday)) {
+      return `${baseWeekText} · (Tuần hiện tại đang học)`;
+    }
+    if (formatDateKey(monday) === formatDateKey(prevRealMonday)) {
+      return `${baseWeekText} · (Tuần trước - Được lưu trữ)`;
+    }
     return `${baseWeekText} · (Tuần đang có lịch học)`;
-  }, [viewMode, currentDate, monday, sunday, isCurrentViewActiveWeek]);
+  }, [viewMode, currentDate, monday, sunday, isCurrentViewActiveWeek, currentRealMonday, prevRealMonday]);
 
   // Danh sách các ngày trong tuần kèm danh sách môn đã sắp xếp (cho chế độ xem Liệt kê)
   const weekDaysList = useMemo(() => {
@@ -442,21 +458,43 @@ export function CalendarPage() {
         <Stat
           label="Lớp học tuần này"
           value={String(displayedCourses.length)}
-          note={!isCurrentViewActiveWeek ? "Tuần này trống lịch" : apiCourses.length ? "Đồng bộ từ myDTU" : "Dữ liệu mẫu"}
+          note={
+            !isCurrentViewActiveWeek
+              ? "Tuần này trống lịch"
+              : formatDateKey(monday) === formatDateKey(prevRealMonday)
+              ? "Lưu trữ tuần trước"
+              : apiCourses.length
+              ? "Đồng bộ từ myDTU"
+              : "Dữ liệu mẫu"
+          }
           icon={BookOpen}
           tone="stat-blue"
         />
         <Stat
           label="Tiết học tiếp theo"
           value={nextClass ? nextClass.startTime : "--:--"}
-          note={nextClass ? `${nextClass.subject} · ${nextClass.room || "DTU"}` : isCurrentViewActiveWeek ? "Không còn tiết học" : "Không có lịch học tuần này"}
+          note={
+            nextClass
+              ? `${nextClass.subject} · ${nextClass.room || "DTU"}`
+              : isCurrentViewActiveWeek
+              ? "Không còn tiết học"
+              : "Không có lịch học tuần này"
+          }
           icon={Clock3}
           tone="stat-amber"
         />
         <Stat
           label="Trạng thái"
           value={isCurrentViewActiveWeek ? (apiCourses.length ? "Đã kết nối" : "Sẵn sàng") : "Trống lịch"}
-          note={isCurrentViewActiveWeek ? `Đã đồng bộ ${displayedCourses.length} môn từ DTU` : "Lịch tuần trước đã xóa"}
+          note={
+            !isCurrentViewActiveWeek
+              ? monday.getTime() > currentRealMonday.getTime()
+                ? "Tuần chưa tới"
+                : "Lịch tuần cũ đã xóa"
+              : formatDateKey(monday) === formatDateKey(prevRealMonday)
+              ? "Lưu trữ tuần trước"
+              : `Đã đồng bộ ${displayedCourses.length} môn từ DTU`
+          }
           icon={Activity}
           tone="stat-purple"
         />
@@ -559,28 +597,11 @@ export function CalendarPage() {
                 borderRadius: "8px",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
                 fontSize: "13px",
                 color: "#64748b",
               }}
             >
-              <span>ℹ️ Tuần này không có lịch học (lịch của tuần trước đã được xóa khi qua tuần mới).</span>
-              <button
-                type="button"
-                onClick={() => updateActiveWeek(monday)}
-                style={{
-                  background: "#eff6ff",
-                  border: "1px solid #bfdbfe",
-                  color: "#1d4ed8",
-                  padding: "4px 12px",
-                  borderRadius: "6px",
-                  fontSize: "12px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}
-              >
-                Kích hoạt lịch cho tuần này
-              </button>
+              <span>ℹ️ Tuần này không có lịch học {monday.getTime() > currentRealMonday.getTime() ? "(tuần tương lai)" : "(lịch các tuần cũ đã được tự động dọn dẹp)"}.</span>
             </div>
           )}
           <div style={{ minWidth: "820px" }}>
@@ -855,8 +876,7 @@ export function CalendarPage() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "8px" }}>
                 {monthCalendarData.map((cell, idx) => {
                   const cellMonday = getMonday(cell.date);
-                  const isCellInActiveWeek = formatDateKey(cellMonday) === formatDateKey(activeWeekMonday);
-                  // Chỉ hiển thị lịch duy nhất ở tuần có chứa ngày đang được kích hoạt; các tuần khác để trống hoàn toàn
+                  const isCellInActiveWeek = checkWeekHasSchedule(cellMonday);
                   const dayCourses = isCellInActiveWeek
                     ? uniqueCourses.filter((c) => c.dayIndex === cell.dayOfWeekIndex)
                     : [];
@@ -865,13 +885,13 @@ export function CalendarPage() {
                     <div
                       key={idx}
                       onClick={() => {
-                        // Khi người dùng bấm vào ngày khi nhìn tháng thì hiện lịch chỉ duy nhất tuần có chứa ngày đó (xóa lịch tuần khác)
+                        // Khi người dùng bấm vào ngày khi nhìn tháng thì hiện lịch chỉ duy nhất tuần có chứa ngày đó
                         const clickedMonday = getMonday(cell.date);
-                        updateActiveWeek(clickedMonday);
+                        setSelectedMonthWeek(clickedMonday);
                         setCurrentDate(cell.date);
                         setViewMode("week");
                       }}
-                      title={isCellInActiveWeek ? "Tuần đang có lịch học. Bấm để xem tuần này." : "Bấm vào ngày này để chỉ hiển thị lịch duy nhất cho tuần này (xóa lịch tuần khác)."}
+                      title={isCellInActiveWeek ? "Tuần đang có lịch học. Bấm để xem tuần này." : "Bấm vào ngày này để chỉ hiển thị lịch duy nhất cho tuần này."}
                       style={{
                         minHeight: "115px",
                         border: cell.isToday
@@ -931,7 +951,11 @@ export function CalendarPage() {
                         )}
                         {isCellInActiveWeek && cell.isCurrentMonth && !cell.isToday && (
                           <span style={{ fontSize: "9px", fontWeight: "700", color: "#1d4ed8", background: "#dbeafe", padding: "1px 5px", borderRadius: "4px" }}>
-                            Tuần có lịch
+                            {formatDateKey(cellMonday) === formatDateKey(currentRealMonday)
+                              ? "Tuần này"
+                              : formatDateKey(cellMonday) === formatDateKey(prevRealMonday)
+                              ? "Tuần trước"
+                              : "Tuần có lịch"}
                           </span>
                         )}
                         {dayCourses.length > 0 && cell.isCurrentMonth && (
