@@ -31,52 +31,6 @@ import { ErrorDialog } from "../components/ErrorDialog";
 export function AdminPage() {
   const currentUser = getCurrentUser();
 
-  // Kiểm tra quyền: chỉ admin mới được sử dụng trang này
-  if (!currentUser?.is_admin) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "65vh",
-          textAlign: "center",
-          padding: "32px 16px",
-        }}
-      >
-        <div
-          style={{
-            width: "68px",
-            height: "68px",
-            borderRadius: "50%",
-            background: "#fee2e2",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: "#dc2626",
-            marginBottom: "18px",
-          }}
-        >
-          <ShieldAlert size={38} />
-        </div>
-        <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#0f172a", margin: "0 0 10px" }}>
-          Truy cập bị từ chối
-        </h2>
-        <p style={{ maxWidth: "480px", color: "#64748b", fontSize: "14px", lineHeight: "1.6", margin: "0 0 24px" }}>
-          Bạn không có quyền truy cập trang quản trị này. Chỉ tài khoản Quản trị viên (Admin) mới có thẩm quyền thực hiện các thao tác quản lý.
-        </p>
-        <Button
-          onClick={() => {
-            window.location.hash = "#/calendar";
-          }}
-        >
-          Quay lại Thời khóa biểu
-        </Button>
-      </div>
-    );
-  }
-
   const [users, setUsers] = useState([]);
   const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState({
@@ -150,18 +104,21 @@ export function AdminPage() {
   };
 
   useEffect(() => {
-    fetchUsers("");
-    fetchLogs();
-    fetchStats();
-  }, [fetchUsers, fetchLogs, fetchStats]);
+    if (currentUser?.is_admin) {
+      fetchUsers("");
+      fetchLogs();
+      fetchStats();
+    }
+  }, [currentUser?.is_admin, fetchUsers, fetchLogs, fetchStats]);
 
   // Tra cứu theo thời gian thực (debounce 350ms)
   useEffect(() => {
+    if (!currentUser?.is_admin) return;
     const timer = setTimeout(() => {
       fetchUsers(searchQuery);
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery, fetchUsers]);
+  }, [currentUser?.is_admin, searchQuery, fetchUsers]);
 
   useEffect(() => {
     setCurrentLogPage(1);
@@ -299,6 +256,52 @@ export function AdminPage() {
       setActionLoading(null);
     }
   };
+
+  // Kiểm tra quyền: chỉ admin mới được sử dụng trang này
+  if (!currentUser?.is_admin) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "65vh",
+          textAlign: "center",
+          padding: "32px 16px",
+        }}
+      >
+        <div
+          style={{
+            width: "68px",
+            height: "68px",
+            borderRadius: "50%",
+            background: "#fee2e2",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "#dc2626",
+            marginBottom: "18px",
+          }}
+        >
+          <ShieldAlert size={38} />
+        </div>
+        <h2 style={{ fontSize: "22px", fontWeight: "700", color: "#0f172a", margin: "0 0 10px" }}>
+          Truy cập bị từ chối
+        </h2>
+        <p style={{ maxWidth: "480px", color: "#64748b", fontSize: "14px", lineHeight: "1.6", margin: "0 0 24px" }}>
+          Bạn không có quyền truy cập trang quản trị này. Chỉ tài khoản Quản trị viên (Admin) mới có thẩm quyền thực hiện các thao tác quản lý.
+        </p>
+        <Button
+          onClick={() => {
+            window.location.hash = "#/calendar";
+          }}
+        >
+          Quay lại Thời khóa biểu
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <>

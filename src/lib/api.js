@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD ? "https://lichhoc-api-96bx.onrender.com" : "http://localhost:3001");
 const AUTH_KEY = "lichhoc_access_token";
 const REFRESH_KEY = "lichhoc_refresh_token";
 const USER_KEY = "lichhoc_user";
