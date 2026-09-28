@@ -534,8 +534,8 @@ export function CalendarPage() {
         action={<Button icon={Plus}>Thêm lịch học</Button>}
       />
 
-      {/* #4. Bảng thống kê (Đã xóa ô số tín chỉ, hiển thị 3 ô đồng bộ chuẩn theo ảnh 3) */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "14px", marginBottom: "18px" }}>
+      {/* #4. Bảng thống kê */}
+      <div className="calendar-stat-grid">
         <Stat
           label="Lớp học tuần này"
           value={String(displayedCourses.length)}
@@ -550,6 +550,7 @@ export function CalendarPage() {
           }
           icon={BookOpen}
           tone="stat-blue"
+          className="calendar-stat-classes"
         />
         <Stat
           label="Tiết học tiếp theo"
@@ -563,6 +564,7 @@ export function CalendarPage() {
           }
           icon={Clock3}
           tone="stat-amber"
+          className="calendar-stat-next"
         />
         <Stat
           label="Trạng thái"
@@ -578,6 +580,7 @@ export function CalendarPage() {
           }
           icon={Activity}
           tone="stat-purple"
+          className="calendar-stat-status"
         />
       </div>
 
@@ -641,7 +644,7 @@ export function CalendarPage() {
             </Button>
             <div className="calendar-nav-group">
               <Button variant="outline" onClick={handlePrev} title="Lùi thời gian">‹</Button>
-              <Button variant="outline" onClick={handleToday} title="Trở về hôm nay">Hôm nay</Button>
+              <Button variant="outline" onClick={handleToday} title="Trở về tuần hiện tại">Tuần</Button>
               <Button variant="outline" onClick={handleNext} title="Tiến thời gian">›</Button>
             </div>
             <div className="calendar-view-toggles" role="tablist">

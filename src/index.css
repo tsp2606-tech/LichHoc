@@ -1053,7 +1053,14 @@ a {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 13px;
-  margin-bottom: 18px
+  margin-bottom: 18px;
+}
+
+.calendar-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
 }
 
 .stat-card,
@@ -1061,63 +1068,86 @@ a {
   background: #fff;
   border: 1px solid #e9ecf2;
   border-radius: 11px;
-  box-shadow: 0 2px 7px #192a4c05
+  box-shadow: 0 2px 7px #192a4c05;
 }
 
 .stat-card {
-  padding: 15px;
-  display: grid;
-  grid-template-columns: 38px 1fr;
-  grid-template-rows: 22px 29px 20px;
-  column-gap: 10px;
-  align-items: center
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  transition: all 0.15s ease;
 }
 
 .stat-icon {
-  grid-row: 1/4;
-  width: 36px;
-  height: 36px;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
   border-radius: 9px;
   display: grid;
-  place-items: center
+  place-items: center;
+}
+
+.stat-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  flex: 1;
+  gap: 1px;
 }
 
 .stat-blue {
   background: #edf0ff;
-  color: #3154e6
+  color: #3154e6;
 }
 
 .stat-green {
   background: #e7f7ef;
-  color: #159568
+  color: #159568;
 }
 
 .stat-amber {
   background: #fff5df;
-  color: #d59112
+  color: #d59112;
 }
 
 .stat-purple {
   background: #f2edff;
-  color: #8159d5
+  color: #8159d5;
 }
 
-.stat-card>span {
-  font-size: 10px;
-  color: #828da2
+.stat-card span,
+.stat-card .stat-label {
+  font-size: 11px;
+  color: #828da2;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.stat-card>b {
-  font-size: 21px;
-  line-height: 1;
+.stat-card b,
+.stat-card .stat-value {
+  font-size: 19px;
+  line-height: 1.2;
   color: #1b2945;
   font-weight: 680;
-  letter-spacing: -.4px
+  letter-spacing: -0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.stat-card>small {
-  font-size: 9px;
-  color: #8a94a5
+.stat-card small,
+.stat-card .stat-note {
+  font-size: 10.5px;
+  color: #8a94a5;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .panel-head {
@@ -3093,17 +3123,60 @@ td svg {
     grid-column: span 2;
   }
 
+  .calendar-stat-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .calendar-stat-classes {
+    order: 1 !important;
+  }
+
+  .calendar-stat-status {
+    order: 2 !important;
+  }
+
+  .calendar-stat-next {
+    grid-column: span 2 !important;
+    order: 3 !important;
+  }
+
   .stat-card {
-    padding: 10px !important;
+    padding: 10px 12px !important;
+    gap: 10px !important;
+    min-height: 64px !important;
+    border-radius: 10px !important;
   }
 
-  .stat-card > b {
-    font-size: 18px !important;
+  .stat-icon {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
   }
 
-  .stat-card > span,
-  .stat-card > small {
+  .stat-icon svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .stat-card span,
+  .stat-card .stat-label {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+  }
+
+  .stat-card b,
+  .stat-card .stat-value {
+    font-size: 17px !important;
+    line-height: 1.25 !important;
+  }
+
+  .stat-card small,
+  .stat-card .stat-note {
     font-size: 10.5px !important;
+    line-height: 1.2 !important;
   }
 
   /* Calendar Header & Tools trên Điện thoại */
