@@ -70,6 +70,15 @@ function extractWeekRange(str) {
   return str.replace(/\s+/g, "").toLowerCase();
 }
 
+export function isMobileDevice() {
+  if (typeof window === "undefined") return false;
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent || ""
+  );
+  const isSmallScreen = window.innerWidth <= 768;
+  return isMobileUA || isSmallScreen;
+}
+
 export function CalendarPage() {
   const [apiCourses, setApiCourses] = useState([]);
   const [syncing, setSyncing] = useState(false);
@@ -77,9 +86,21 @@ export function CalendarPage() {
   const [syncSuccess, setSyncSuccess] = useState(true);
   const [errorDialog, setErrorDialog] = useState(null);
 
-  // Trạng thái ngày đang chọn & Chế độ xem: "week" (Tuần) | "month" (Tháng) | "list" (Liệt kê)
+  // Trạng thái ngày đang chọn & Chế độ xem: "list" (Liệt kê - mặc định trên điện thoại) | "week" (Tuần) | "month" (Tháng)
+  const [userManuallySelectedView, setUserManuallySelectedView] = useState(false);
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [viewMode, setViewMode] = useState("week");
+  const [viewMode, setViewMode] = useState(() => (isMobileDevice() ? "list" : "week"));
+
+  useEffect(() => {
+    const handleResize = () => {
+      // Hỗ trợ tự thích ứng khi thay đổi kích thước hoặc xoay màn hình nếu người dùng chưa chọn thủ công
+      if (!userManuallySelectedView && isMobileDevice()) {
+        setViewMode("list");
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [userManuallySelectedView]);
 
   const now = new Date(); // Thời gian thực tế hệ thống
 
@@ -595,7 +616,7 @@ export function CalendarPage() {
       {/* Bảng Thời khóa biểu chuẩn kiểu Telerik RadScheduler như Ảnh 2 */}
       <section className="panel calendar-panel" style={{ overflow: "hidden", border: "1px solid #e2e8f0" }}>
         <div className="panel-head">
-          <div>
+          <div className="panel-lead">
             <h2>Lịch học của tôi</h2>
             <p>{subtitleText}</p>
           </div>
@@ -605,6 +626,7 @@ export function CalendarPage() {
               icon={RefreshCw}
               onClick={handleSync}
               disabled={syncing}
+              className="calendar-btn-sync"
               style={{
                 backgroundColor: "#f0fdf4",
                 borderColor: "#86efac",
@@ -617,30 +639,43 @@ export function CalendarPage() {
             >
               {syncing ? "Đang đồng bộ..." : "Đồng bộ dữ liệu"}
             </Button>
-            <Button variant="outline" onClick={handlePrev} title="Lùi thời gian">‹</Button>
-            <Button variant="outline" onClick={handleToday} title="Trở về hôm nay">Hôm nay</Button>
-            <Button variant="outline" onClick={handleNext} title="Tiến thời gian">›</Button>
-            <button
-              type="button"
-              className={`view-toggle ${viewMode === "week" ? "selected" : ""}`}
-              onClick={() => setViewMode("week")}
-            >
-              Tuần
-            </button>
-            <button
-              type="button"
-              className={`view-toggle ${viewMode === "month" ? "selected" : ""}`}
-              onClick={() => setViewMode("month")}
-            >
-              Tháng
-            </button>
-            <button
-              type="button"
-              className={`view-toggle ${viewMode === "list" ? "selected" : ""}`}
-              onClick={() => setViewMode("list")}
-            >
-              Liệt kê
-            </button>
+            <div className="calendar-nav-group">
+              <Button variant="outline" onClick={handlePrev} title="Lùi thời gian">‹</Button>
+              <Button variant="outline" onClick={handleToday} title="Trở về hôm nay">Hôm nay</Button>
+              <Button variant="outline" onClick={handleNext} title="Tiến thời gian">›</Button>
+            </div>
+            <div className="calendar-view-toggles" role="tablist">
+              <button
+                type="button"
+                className={`view-toggle ${viewMode === "list" ? "selected" : ""}`}
+                onClick={() => {
+                  setUserManuallySelectedView(true);
+                  setViewMode("list");
+                }}
+              >
+                Liệt kê
+              </button>
+              <button
+                type="button"
+                className={`view-toggle ${viewMode === "week" ? "selected" : ""}`}
+                onClick={() => {
+                  setUserManuallySelectedView(true);
+                  setViewMode("week");
+                }}
+              >
+                Tuần
+              </button>
+              <button
+                type="button"
+                className={`view-toggle ${viewMode === "month" ? "selected" : ""}`}
+                onClick={() => {
+                  setUserManuallySelectedView(true);
+                  setViewMode("month");
+                }}
+              >
+                Tháng
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1071,118 +1106,74 @@ export function CalendarPage() {
           </div>
         )}
 
-        {/* 3. Chế độ xem LIỆT KÊ (List / Agenda) */}
+        {/* 3. Chế độ xem LIỆT KÊ (List / Agenda - Mặc định trên điện thoại) */}
         {viewMode === "list" && (
-          <div style={{ padding: "18px 22px", display: "flex", flexDirection: "column", gap: "16px", background: "#ffffff" }}>
+          <div className="calendar-list-container">
             {weekDaysList.map((day) => (
               <div
                 key={day.dayIndex}
-                style={{
-                  border: day.isToday ? "2px solid #eab308" : "1px solid #e2e8f0",
-                  borderRadius: "12px",
-                  overflow: "hidden",
-                  backgroundColor: day.isToday ? "#fffdf5" : "#ffffff",
-                  boxShadow: day.isToday ? "0 4px 14px rgba(234, 179, 8, 0.1)" : "0 1px 3px rgba(0,0,0,0.03)",
-                }}
+                className={`calendar-list-day-card ${day.isToday ? "today" : ""}`}
               >
                 {/* Header ngày */}
-                <div
-                  style={{
-                    padding: "11px 18px",
-                    background: day.isToday ? "#fef9c3" : "#f8fafc",
-                    borderBottom: "1px solid #e2e8f0",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                    <span style={{ fontSize: "16px" }}>📅</span>
-                    <strong style={{ fontSize: "14.5px", color: day.isToday ? "#854d0e" : "#0f172a" }}>
+                <div className="calendar-list-day-header">
+                  <div className="day-header-title">
+                    <span className="calendar-emoji">📅</span>
+                    <strong className="day-title-text">
                       {day.dayName}, {day.dateText}
                     </strong>
                     {day.isToday && (
-                      <span
-                        style={{
-                          padding: "2px 8px",
-                          borderRadius: "12px",
-                          background: "#eab308",
-                          color: "#ffffff",
-                          fontSize: "11px",
-                          fontWeight: "700",
-                        }}
-                      >
+                      <span className="today-badge">
                         Hôm nay
                       </span>
                     )}
                   </div>
-                  <span style={{ fontSize: "12px", fontWeight: "600", color: "#64748b" }}>
+                  <span className="day-course-count">
                     {day.courses.length > 0 ? `${day.courses.length} tiết học` : "Không có lịch học"}
                   </span>
                 </div>
 
                 {/* Danh sách các tiết học */}
-                <div style={{ padding: "14px 18px" }}>
+                <div className="calendar-list-day-body">
                   {day.courses.length === 0 ? (
-                    <div style={{ padding: "8px 0", color: "#94a3b8", fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <div className="calendar-list-empty">
                       <span>☕</span>
                       <span>Không có lịch học vào ngày này. Hãy tận hưởng thời gian nghỉ ngơi hoặc tự học!</span>
                     </div>
                   ) : (
-                    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    <div className="calendar-list-course-list">
                       {day.courses.map((course, cIdx) => (
                         <div
                           key={cIdx}
-                          style={{
-                            display: "grid",
-                            gridTemplateColumns: "150px 1fr auto",
-                            alignItems: "center",
-                            gap: "18px",
-                            padding: "12px 16px",
-                            borderRadius: "10px",
-                            background: "#f8fafc",
-                            border: "1px solid #e2e8f0",
-                            transition: "all 0.15s ease",
-                          }}
+                          className="calendar-list-course-card"
                         >
                           {/* Cột thời gian */}
-                          <div style={{ display: "flex", flexDirection: "column" }}>
-                            <div style={{ fontSize: "14.5px", fontWeight: "800", color: "#1e293b", display: "flex", alignItems: "center", gap: "6px" }}>
+                          <div className="course-card-time-block">
+                            <div className="course-card-time">
                               <Clock3 size={15} color="#2563eb" />
                               <span>{course.startTime} - {course.endTime}</span>
                             </div>
-                            <span style={{ fontSize: "11px", color: "#64748b", marginTop: "2px" }}>
+                            <span className="course-duration">
                               Thời lượng ~ {Math.max(0, parseMinutes(course.endTime) - parseMinutes(course.startTime))} phút
                             </span>
                           </div>
 
                           {/* Cột thông tin môn học & phòng */}
-                          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                            <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                              <span
-                                style={{
-                                  fontSize: "11px",
-                                  fontFamily: "monospace",
-                                  fontWeight: "700",
-                                  padding: "2px 7px",
-                                  borderRadius: "4px",
-                                  background: "#e2e8f0",
-                                  color: "#334155",
-                                }}
-                              >
+                          <div className="course-card-details">
+                            <div className="course-card-header">
+                              <span className="course-code-pill">
                                 {course.code || "MÃ LỚP"}
                               </span>
-                              <strong style={{ fontSize: "15px", color: "#0f172a" }}>
+                              <strong className="course-subject-title">
                                 {course.subject}
                               </strong>
                             </div>
 
-                            <div style={{ display: "flex", alignItems: "center", gap: "18px", fontSize: "12.5px", color: "#475569" }}>
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                            <div className="course-card-meta">
+                              <span className="meta-room">
                                 <MapPin size={13} color="#2563eb" />
                                 <b>{course.room || "Chưa rõ phòng"}</b> {course.location ? `· ${course.location}` : ""}
                               </span>
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}>
+                              <span className="meta-teacher">
                                 <span>👤</span>
                                 <span>{course.teacher || "Giảng viên bộ môn"}</span>
                               </span>
@@ -1190,18 +1181,9 @@ export function CalendarPage() {
                           </div>
 
                           {/* Cột nhãn trạng thái */}
-                          <div>
+                          <div className="course-card-badge-wrap">
                             <span
-                              style={{
-                                padding: "4px 12px",
-                                borderRadius: "6px",
-                                fontSize: "12px",
-                                fontWeight: "600",
-                                backgroundColor: course.room?.toLowerCase().includes("online") ? "#f0fdf4" : "#eff6ff",
-                                color: course.room?.toLowerCase().includes("online") ? "#15803d" : "#1d4ed8",
-                                border: `1px solid ${course.room?.toLowerCase().includes("online") ? "#bbf7d0" : "#bfdbfe"}`,
-                                display: "inline-block",
-                              }}
+                              className={`course-type-badge ${course.room?.toLowerCase().includes("online") ? "online" : "campus"}`}
                             >
                               {course.room?.toLowerCase().includes("online") ? "Trực tuyến (Online)" : "Tại trường"}
                             </span>
