@@ -1,62 +1,89 @@
-import { useState } from "react";
-import { signInWithPopup } from "firebase/auth";
+import { useEffect, useState } from "react";
+import { getRedirectResult, signInWithPopup, signInWithRedirect } from "firebase/auth";
 import { auth, googleProvider } from "../lib/firebase";
 import { googleLoginApi } from "../lib/api";
+
+let redirectResultHandled = false;
 
 export function GoogleLoginButton({ onSuccess, onError, text = "Đăng nhập bằng Google", disabled = false }) {
   const [loading, setLoading] = useState(false);
 
+  const completeGoogleLogin = async (user) => {
+    const idToken = await user.getIdToken();
+    const userInfo = {
+      email: user.email,
+      name: user.displayName || "",
+      picture: user.photoURL || "",
+      uid: user.uid,
+    };
+    const res = await googleLoginApi({ idToken, userInfo });
+
+    const isExtensionFlow =
+      new URLSearchParams(window.location.search).get("source") === "extension" ||
+      new URLSearchParams(window.location.hash.slice(1)).get("source") === "extension";
+    if (isExtensionFlow && window.opener) {
+      window.opener.postMessage(
+        { type: "LICHHOC_EXTENSION_AUTH_SUCCESS", data: res },
+        "*"
+      );
+    }
+
+    onSuccess?.(res);
+  };
+
+  const reportGoogleError = (error) => {
+    console.error("Lỗi Google Sign-In:", error);
+    let errorMsg = "Đăng nhập Google thất bại. Vui lòng thử lại.";
+    if (error.code === "auth/popup-blocked") {
+      errorMsg = "Trình duyệt đã chặn cửa sổ đăng nhập. Hãy thử mở trang bằng Chrome hoặc Safari.";
+    } else if (error.code === "auth/popup-closed-by-user") {
+      errorMsg = "Cửa sổ đăng nhập Google đã đóng trước khi hoàn tất. Hãy thử lại.";
+    } else if (error.message) {
+      errorMsg = error.message;
+    }
+
+    onError?.(errorMsg, error.code);
+  };
+
+  useEffect(() => {
+    let active = true;
+
+    getRedirectResult(auth)
+      .then(async (result) => {
+        if (!active || !result || redirectResultHandled) return;
+        redirectResultHandled = true;
+        setLoading(true);
+        await completeGoogleLogin(result.user);
+      })
+      .catch((error) => {
+        if (active) reportGoogleError(error);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const handleLoginGoogle = async () => {
     setLoading(true);
     try {
-      // 1. Mở popup đăng nhập tài khoản Google (tham khảo AuthFE)
+      const isExtensionFlow =
+        new URLSearchParams(window.location.search).get("source") === "extension" ||
+        new URLSearchParams(window.location.hash.slice(1)).get("source") === "extension";
+      const isMobileBrowser = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+      if (isMobileBrowser && !isExtensionFlow) {
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      }
+
       const result = await signInWithPopup(auth, googleProvider);
-
-      // 2. Lấy Firebase ID Token từ user đăng nhập
-      const idToken = await result.user.getIdToken();
-
-      const userInfo = {
-        email: result.user.email,
-        name: result.user.displayName || "",
-        picture: result.user.photoURL || "",
-        uid: result.user.uid,
-      };
-
-      // 3. Gửi idToken và userInfo lên Backend API
-      const res = await googleLoginApi({ idToken, userInfo });
-
-      // Nếu mở từ Chrome Extension, gửi tín hiệu đồng bộ qua window postMessage / storage
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("source") === "extension") {
-        try {
-          if (window.opener) {
-            window.opener.postMessage(
-              { type: "LICHHOC_EXTENSION_AUTH_SUCCESS", data: res },
-              "*"
-            );
-          }
-        } catch {
-          // ignore cross-origin error if any
-        }
-      }
-
-      if (onSuccess) {
-        onSuccess(res);
-      }
+      await completeGoogleLogin(result.user);
     } catch (error) {
-      console.error("Lỗi Google Sign-In:", error);
-      let errorMsg = "Đăng nhập Google thất bại. Vui lòng thử lại.";
-      if (error.code === "auth/popup-blocked") {
-        errorMsg = "Trình duyệt đã chặn Pop-up! Vui lòng cho phép pop-up trên thanh địa chỉ.";
-      } else if (error.code === "auth/popup-closed-by-user") {
-        errorMsg = "Bạn đã đóng cửa sổ đăng nhập Google.";
-      } else if (error.message) {
-        errorMsg = error.message;
-      }
-
-      if (onError) {
-        onError(errorMsg, error.code);
-      }
+      reportGoogleError(error);
     } finally {
       setLoading(false);
     }
