@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo, useCallback } from "react";
-import { Plus, BookOpen, Clock3, Activity, RefreshCw, MapPin } from "lucide-react";
+import { BookOpen, Clock3, Activity, RefreshCw, MapPin } from "lucide-react";
 import { PageHeading, Button } from "../components/AppShell";
 import { Stat } from "../components/Display";
 import { classes } from "../data/mockSchedule";
@@ -531,7 +531,6 @@ export function CalendarPage() {
         eyebrow={`HÔM NAY · ${now.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()}`}
         title="Thời khóa biểu của tôi 👋"
         detail="Lịch học được đồng bộ trực tiếp từ MyDTU. Dễ dàng tra cứu và sắp xếp thời gian."
-        action={<Button icon={Plus}>Thêm lịch học</Button>}
       />
 
       {/* #4. Bảng thống kê */}

@@ -13,6 +13,7 @@ import { clearAuth, getAuthToken, getCurrentUser } from "./lib/api";
 const protectedPages = new Set(["calendar", "import", "manage", "admin", "settings"]);
 
 function App() {
+  const [isDark, setIsDark] = useState(() => localStorage.getItem("lichhoc_theme") === "dark");
   const readPage = () => {
     const raw = location.hash.replace(/^#\/?/, "");
     const pageName = raw.split("?")[0].replace(/^\//, "");
@@ -20,6 +21,12 @@ function App() {
   };
   const [page, setPage] = useState(readPage);
   const [user, setUser] = useState(getCurrentUser());
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = isDark ? "dark" : "light";
+    document.documentElement.classList.toggle("dark", isDark);
+    localStorage.setItem("lichhoc_theme", isDark ? "dark" : "light");
+  }, [isDark]);
 
   useEffect(() => {
     const onHashChange = () => {
@@ -66,9 +73,11 @@ function App() {
     <div className="app-shell">
       <Sidebar page={page} go={go} user={user} onLogout={handleLogout} />
       <div className="main-column">
-        <Topbar title={titles[page] || titles.calendar} user={user} onLogout={handleLogout} />
+        <Topbar title={titles[page] || titles.calendar} user={user} onLogout={handleLogout} isDark={isDark} onToggleTheme={() => setIsDark((current) => !current)} />
         <main className="page-content">
-          {pages[page] || pages.calendar}
+          <div key={page} className="page-transition">
+            {pages[page] || pages.calendar}
+          </div>
           <footer className="app-footer">
             <span>© 2025 LichHoc</span>
             <span>Học tập có kế hoạch. Sống trọn từng ngày.</span>

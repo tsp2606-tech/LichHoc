@@ -1,9 +1,9 @@
-import { CalendarDays, ChevronDown, CircleHelp, Code2, Database, GraduationCap, Link2, Search, ShieldCheck, Bell, MoreHorizontal } from "lucide-react";
+import { CalendarDays, ChevronDown, CircleHelp, Database, GraduationCap, Link2, Search, ShieldCheck, Bell, MoreHorizontal, Moon, Sun } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getNotifications, getUnreadNotificationsCount, markAllNotificationsRead } from "../lib/notifications";
 
 const navItems = [
-  ["calendar", "Lịch của tôi", CalendarDays], ["import", "Nhập lịch HTML", Code2],
+  ["calendar", "Lịch của tôi", CalendarDays],
   ["manage", "Quản lý lịch học", Database], ["admin", "Quản trị viên", ShieldCheck],
   ["settings", "Cài đặt & kết nối", Link2],
 ];
@@ -22,7 +22,7 @@ export function Sidebar({ page, go, user, onLogout }) {
         {visibleNav.map(([id, label, Icon]) => (
           <a key={id} href={`#/${id}`} onClick={() => go(id)} className={`nav-link ${page === id ? "active" : ""}`}>
             <Icon size={18} />
-            <span>{label}</span>
+            <span className="nav-label" data-mobile-label={{ calendar: "Lịch", manage: "Quản lý", admin: "Admin", settings: "Cài đặt" }[id]}>{label}</span>
             {id === "calendar" && <span className="nav-count">6</span>}
           </a>
         ))}
@@ -37,7 +37,7 @@ export function Sidebar({ page, go, user, onLogout }) {
         <small>Tuần 8 trên 15</small>
       </div>
       <div className="sidebar-bottom">
-        <a className="nav-link" href="#/help"><CircleHelp size={18} />Trợ giúp & hướng dẫn</a>
+        <a className="nav-link" href="#/help"><CircleHelp size={18} /><span className="nav-label" data-mobile-label="Trợ giúp">Trợ giúp &amp; hướng dẫn</span></a>
         <div className="profile-mini">
           {user?.avatar ? (
             <img src={user.avatar} alt={userName} className="avatar-img" />
@@ -56,7 +56,7 @@ export function Sidebar({ page, go, user, onLogout }) {
   );
 }
 
-export function Topbar({ title, user, onLogout }) {
+export function Topbar({ title, user, onLogout, isDark, onToggleTheme }) {
   const userName = user?.email ? user.email.split("@")[0].replace(/[._]/g, " ") : "Sinh viên";
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
@@ -108,6 +108,9 @@ export function Topbar({ title, user, onLogout }) {
             </div>
           )}
         </div>
+        <button type="button" className={`theme-toggle topbar-theme-toggle ${isDark ? "is-dark" : "is-light"}`} onClick={onToggleTheme} aria-label={isDark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"} title={isDark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}>
+          {isDark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
+        </button>
         <span className="top-divider" />
         <button className="user-chip" type="button">
           {user?.avatar ? (
