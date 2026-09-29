@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronDown, CircleHelp, Database, GraduationCap, Link2, Search, ShieldCheck, Bell, MoreHorizontal, Moon, Sun } from "lucide-react";
+import { CalendarDays, ChevronDown, CircleHelp, Database, GraduationCap, Link2, Search, ShieldCheck, Bell, LogOut, MoreHorizontal, Moon, Sun } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getNotifications, getUnreadNotificationsCount, markAllNotificationsRead } from "../lib/notifications";
 
@@ -121,7 +121,18 @@ export function Topbar({ title, user, onLogout, isDark, onToggleTheme }) {
           <span>{userName}</span>
           <ChevronDown size={15} />
         </button>
-        {onLogout && <button type="button" className="button outline" onClick={onLogout}>Đăng xuất</button>}
+        {onLogout && (
+          <button
+            type="button"
+            className="button outline topbar-logout"
+            onClick={onLogout}
+            aria-label="Đăng xuất"
+            title="Đăng xuất"
+          >
+            <LogOut className="topbar-logout-icon" size={16} aria-hidden="true" />
+            <span className="topbar-logout-label">Đăng xuất</span>
+          </button>
+        )}
       </div>
     </header>
   );

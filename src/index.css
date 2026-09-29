@@ -2965,14 +2965,18 @@ td svg {
 }
 
 @media(max-width:768px) {
+  html,
   body {
-    min-width: 100%;
+    width: 100%;
+    min-width: 320px;
     overflow-x: hidden;
   }
 
   .app-shell {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 100%;
     min-height: 100vh;
   }
 
@@ -3067,11 +3071,15 @@ td svg {
   }
 
   .main-column {
+    width: 100%;
+    max-width: 100%;
     margin-left: 0;
     min-width: 0
   }
 
   .topbar {
+    width: 100%;
+    min-width: 0;
     height: 58px;
     padding: 0 10px;
     gap: 8px
@@ -3105,14 +3113,57 @@ td svg {
   .top-actions .search-box,
   .top-divider,
   .user-chip > span:not(.avatar-initial),
-  .user-chip > svg,
-  .top-actions > .button.outline {
+  .user-chip > svg {
+    display: none;
+  }
+
+  .topbar-logout {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 0;
+  }
+
+  .topbar-logout-icon {
+    display: block;
+  }
+
+  .topbar-logout-label {
     display: none;
   }
 
   .page-content {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
     min-width: 0;
     padding: 18px 12px calc(22px + 78px + env(safe-area-inset-bottom));
+  }
+
+  .page-content > *,
+  .stat-grid > *,
+  .admin-grid > * {
+    min-width: 0;
+  }
+
+  .admin-table-scroll {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .admin-table-scroll table {
+    min-width: 870px;
+  }
+
+  .admin-logs-scroll table {
+    min-width: 560px;
   }
 
   .page-heading {
@@ -4060,6 +4111,24 @@ td svg {
 :root[data-theme="dark"] .auth-form-side .field label,
 :root[data-theme="dark"] .field-label {
   color: #c6cfde;
+}
+
+:root[data-theme="dark"] .admin-table-scroll thead tr {
+  background: #1b2638 !important;
+  color: #c2ccdc !important;
+}
+
+:root[data-theme="dark"] .admin-table-scroll th {
+  color: #c2ccdc !important;
+}
+
+:root[data-theme="dark"] .admin-table-scroll td {
+  border-color: #2a3548 !important;
+  color: #cbd5e1 !important;
+}
+
+:root[data-theme="dark"] .admin-table-scroll td strong {
+  color: #e5eaf3 !important;
 }
 
 @media (max-width: 760px) {

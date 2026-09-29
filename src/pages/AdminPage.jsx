@@ -382,7 +382,7 @@ export function AdminPage() {
         </div>
 
         {/* Bảng danh sách người dùng */}
-        <div style={{ overflowX: "auto" }}>
+        <div className="admin-table-scroll" aria-label="Danh sách người dùng, vuốt ngang để xem thêm cột" role="region" tabIndex={0}>
           <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed", fontSize: "13px", marginTop: "8px" }}>
             <thead>
               <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", textAlign: "left", color: "#475569" }}>
@@ -630,7 +630,7 @@ export function AdminPage() {
           </div>
         </div>
 
-        <div style={{ overflowX: "auto", marginTop: "12px" }}>
+        <div className="admin-table-scroll admin-logs-scroll" aria-label="Nhật ký hoạt động, vuốt ngang để xem thêm cột" role="region" tabIndex={0} style={{ marginTop: "12px" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
             <thead>
               <tr style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", textAlign: "left", color: "#475569" }}>
