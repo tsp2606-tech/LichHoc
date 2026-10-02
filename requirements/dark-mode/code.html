@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LichHoc - Thời khóa biểu của tôi</title>
+  <!-- Google Fonts & Tailwind CDN -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+          colors: {
+            canvas: '#0D1117',
+            surface: {
+              DEFAULT: '#161B22',
+              hover: '#21262D',
+              border: '#30363D',
+              subtle: '#1C2128'
+            },
+            accent: {
+              DEFAULT: '#6366F1', // Indigo
+              hover: '#4F46E5',
+              glow: 'rgba(99, 102, 241, 0.18)'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg-main: #0D1117;
+      --bg-card: #161B22;
+      --border-subtle: #262C36;
+      --text-primary: #F0F6FC;
+      --text-secondary: #8B949E;
+      --text-muted: #6E7681;
+    }
+    body {
+      background-color: #0D1117;
+      color: #F0F6FC;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      user-select: none;
+    }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0D1117;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #30363D;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #484F58;
+    }
+    .grid-cell {
+      min-height: 52px;
+      border-right: 1px solid rgba(48, 54, 61, 0.45);
+      border-bottom: 1px solid rgba(48, 54, 61, 0.35);
+    }
+  </style>
+</head>
+<body class="flex h-screen w-screen overflow-hidden text-sm antialiased selection:bg-indigo-500/30">
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="w-64 flex-shrink-0 flex flex-col justify-between border-r border-[#21262D] bg-[#12161E] px-4 py-5 z-20">
+    <div class="space-y-6">
+      <!-- App Brand Logo -->
+      <div class="flex items-center gap-3 px-2">
+        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white shadow-lg shadow-indigo-500/25">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-base tracking-tight text-white">LichHoc</span>
+            <span class="rounded bg-indigo-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-400 border border-indigo-500/20">DTU</span>
+          </div>
+          <p class="text-[11px] text-[#8B949E]">Không gian học tập cá nhân</p>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="space-y-1">
+        <p class="px-2 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#6E7681]">Không gian của bạn</p>
+        
+        <!-- Active link -->
+        <a href="#" class="flex items-center justify-between rounded-lg bg-indigo-600/15 px-3 py-2 text-indigo-300 font-medium border border-indigo-500/25 relative group">
+          <div class="flex items-center gap-3">
+            <svg class="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span class="text-[13px]">Lịch của tôi</span>
+          </div>
+          <span class="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-500 text-[11px] font-bold text-white shadow-sm">6</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2 text-[#8B949E] hover:bg-[#1C2128] hover:text-white transition-colors">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+          </svg>
+          <span class="text-[13px]">Quản lý lịch học</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2 text-[#8B949E] hover:bg-[#1C2128] hover:text-white transition-colors">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          <span class="text-[13px]">Quản trị viên</span>
+        </a>
+
+        <a href="#" class="flex items-center gap-3 rounded-lg px-3 py-2 text-[#8B949E] hover:bg-[#1C2128] hover:text-white transition-colors">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+          </svg>
+          <span class="text-[13px]">Cài đặt & kết nối</span>
+        </a>
+      </nav>
+
+      <!-- Semester Badge Card -->
+      <div class="rounded-xl border border-[#262C36] bg-[#161B22]/90 p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-1.5">
+            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span class="text-[11px] font-semibold uppercase text-emerald-400 tracking-wider">Học kỳ hiện tại</span>
+          </div>
+          <span class="text-[11px] font-mono text-[#8B949E]">HK 1</span>
+        </div>
+        <div>
+          <p class="font-semibold text-xs text-white">Năm học 2025 – 2026</p>
+          <p class="text-[11px] text-[#8B949E]">Đại học Duy Tân</p>
+        </div>
+        <div class="space-y-1">
+          <div class="flex justify-between text-[11px]">
+            <span class="text-[#8B949E]">Tiến độ học kỳ</span>
+            <span class="font-medium text-indigo-300">Tuần 8 / 15</span>
+          </div>
+          <div class="h-1.5 w-full overflow-hidden rounded-full bg-[#21262D]">
+            <div class="h-full w-[53.3%] rounded-full bg-gradient-to-r from-indigo-500 to-indigo-400"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User & Help Profile -->
+    <div class="space-y-2 pt-4 border-t border-[#21262D]">
+      <a href="#" class="flex items-center gap-2.5 rounded-lg px-2 py-1.5 text-xs text-[#8B949E] hover:text-white transition-colors">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Trợ giúp & hướng dẫn</span>
+      </a>
+
+      <div class="flex items-center justify-between rounded-xl bg-[#161B22] p-2.5 border border-[#262C36]">
+        <div class="flex items-center gap-2.5">
+          <div class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600/30 text-xs font-bold text-indigo-300 border border-indigo-500/40">
+            A
+          </div>
+          <div class="leading-tight">
+            <p class="text-xs font-semibold text-white">Administrator</p>
+            <p class="text-[10px] text-[#8B949E]">Quản trị viên (Admin)</p>
+          </div>
+        </div>
+        <button title="Đăng xuất" class="p-1 text-[#8B949E] hover:text-rose-400 transition-colors">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT AREA ================= -->
+  <main class="flex-1 flex flex-col h-full bg-[#0D1117] overflow-hidden">
+    
+    <!-- Top Global Header -->
+    <header class="h-14 border-b border-[#21262D] bg-[#12161E]/80 backdrop-blur-md px-6 flex items-center justify-between flex-shrink-0 z-10">
+      <!-- Breadcrumb -->
+      <div class="flex items-center gap-2 text-xs">
+        <span class="text-[#8B949E] flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          Đại học Duy Tân
+        </span>
+        <span class="text-[#484F58]">/</span>
+        <span class="font-medium text-white">Lịch của tôi</span>
+      </div>
+
+      <!-- Quick Action Controls -->
+      <div class="flex items-center gap-3">
+        <!-- Search bar -->
+        <div class="relative w-64">
+          <input type="text" placeholder="Tìm kiếm môn học, phòng..." 
+            class="w-full h-8 pl-8 pr-10 text-xs rounded-lg bg-[#161B22] border border-[#30363D] text-[#C9D1D9] placeholder-[#6E7681] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+          <svg class="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-[#6E7681]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <kbd class="absolute right-2 top-2 px-1.5 py-0.5 text-[9px] font-mono text-[#8B949E] bg-[#21262D] rounded border border-[#30363D]">⌘K</kbd>
+        </div>
+
+        <!-- Notification bell -->
+        <button class="relative p-1.5 text-[#8B949E] hover:text-white rounded-lg hover:bg-[#21262D] transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-indigo-500"></span>
+        </button>
+
+        <!-- Theme toggle -->
+        <button class="p-1.5 text-[#8B949E] hover:text-amber-300 rounded-lg hover:bg-[#21262D] transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        </button>
+
+        <div class="h-4 w-px bg-[#30363D]"></div>
+
+        <button class="flex items-center gap-1.5 text-xs text-[#8B949E] hover:text-white px-2 py-1 rounded-lg hover:bg-[#21262D]">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <span>Đăng xuất</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Scrollable Body Container -->
+    <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
+
+      <!-- Title & Greeting Section -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-indigo-400">
+            <span>HÔM NAY • THỨ SÁU, 2 THÁNG 10</span>
+            <span class="inline-flex items-center gap-1 rounded bg-indigo-500/10 px-2 py-0.5 text-[10px] text-indigo-300 border border-indigo-500/20">Tuần học 8</span>
+          </div>
+          <h1 class="text-2xl font-bold tracking-tight text-white mt-1 flex items-center gap-2">
+            Thời khóa biểu của tôi <span class="animate-bounce">👋</span>
+          </h1>
+          <p class="text-xs text-[#8B949E] mt-0.5">
+            Lịch học được đồng bộ trực tiếp từ MyDTU. Dễ dàng tra cứu và sắp xếp thời gian biểu.
+          </p>
+        </div>
+
+        <!-- Quick Status Legend -->
+        <div class="flex items-center gap-3 text-xs bg-[#161B22] px-3 py-1.5 rounded-lg border border-[#262C36] text-[#8B949E]">
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+            <span>Môn Online</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
+            <span>Lý thuyết</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <span>Thực hành/Thể chất</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3 Metrics Statistic Cards (Đã sửa lỗi hiển thị chữ tối ở bản cũ) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Card 1: Tổng môn tuần -->
+        <div class="rounded-xl border border-[#262C36] bg-[#161B22] p-4 flex items-center justify-between hover:border-indigo-500/40 transition-all group">
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-[#8B949E] uppercase tracking-wider">Lớp học tuần này</p>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-bold text-white tracking-tight group-hover:text-indigo-300 transition-colors">8</span>
+              <span class="text-xs text-[#8B949E]">buổi học</span>
+            </div>
+            <p class="text-[11px] text-[#8B949E] flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
+              Đồng bộ từ myDTU
+            </p>
+          </div>
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 group-hover:scale-105 transition-transform">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+          </div>
+        </div>
+
+        <!-- Card 2: Tiết học tiếp theo -->
+        <div class="rounded-xl border border-indigo-500/30 bg-gradient-to-br from-[#161B22] to-indigo-950/20 p-4 flex items-center justify-between relative overflow-hidden shadow-lg shadow-indigo-950/20">
+          <div class="space-y-1 z-10">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-medium text-indigo-300 uppercase tracking-wider">Tiết học tiếp theo</p>
+              <span class="rounded bg-rose-500/20 px-1.5 py-0.2 text-[10px] font-semibold text-rose-300 border border-rose-500/30">Hôm nay</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-bold font-mono text-white tracking-tight">13:00</span>
+              <span class="text-xs text-indigo-200/80">chiều nay</span>
+            </div>
+            <p class="text-[11px] text-[#C9D1D9] font-medium truncate max-w-[200px]" title="Vật Lý Đại Cương 1 - P. 408">
+              PHY 101 K • Vật Lý ĐC 1 (P. 408)
+            </p>
+          </div>
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+            <svg class="w-6 h-6 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+        </div>
+
+        <!-- Card 3: Trạng thái đồng bộ -->
+        <div class="rounded-xl border border-[#262C36] bg-[#161B22] p-4 flex items-center justify-between hover:border-emerald-500/40 transition-all group">
+          <div class="space-y-1">
+            <p class="text-xs font-medium text-[#8B949E] uppercase tracking-wider">Trạng thái kết nối</p>
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              </span>
+              <span class="text-xl font-bold text-emerald-400 tracking-tight">Đã kết nối</span>
+            </div>
+            <p class="text-[11px] text-[#8B949E]">
+              Đã đồng bộ đủ 8 môn từ DTU
+            </p>
+          </div>
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timetable Container Header Bar -->
+      <div class="rounded-2xl border border-[#262C36] bg-[#161B22] shadow-xl overflow-hidden">
+        
+        <!-- Controls & Filter Toolbar (Hài hòa tông màu) -->
+        <div class="p-4 border-b border-[#21262D] flex flex-col md:flex-row md:items-center justify-between gap-3 bg-[#161B22]">
+          <div class="flex items-center gap-3">
+            <h2 class="text-sm font-bold text-white tracking-wide">Lịch học tuần</h2>
+            <div class="h-4 w-px bg-[#30363D]"></div>
+            <div class="flex items-center gap-1.5 text-xs text-[#8B949E]">
+              <span class="text-white font-medium">Tuần 8:</span>
+              <span>28/09/2026 – 04/10/2026</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-500/15 text-indigo-300 border border-indigo-500/20 ml-1">Tuần hiện tại</span>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <!-- Nút Đồng bộ dữ liệu (Đã sửa từ xanh lá chói sang tone Indigo/Surface cao cấp) -->
+            <button class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white transition-all text-xs font-semibold shadow-sm">
+              <svg class="w-3.5 h-3.5 animate-spin-reverse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+              <span>Đồng bộ dữ liệu</span>
+            </button>
+
+            <!-- Navigation Buttons -->
+            <div class="flex items-center bg-[#0D1117] rounded-lg p-0.5 border border-[#30363D]">
+              <button class="p-1 rounded text-[#8B949E] hover:text-white hover:bg-[#21262D] transition-colors" title="Tuần trước">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              </button>
+              <button class="px-2.5 py-1 text-xs font-medium text-white hover:bg-[#21262D] rounded transition-colors">
+                Hôm nay
+              </button>
+              <button class="p-1 rounded text-[#8B949E] hover:text-white hover:bg-[#21262D] transition-colors" title="Tuần sau">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </button>
+            </div>
+
+            <!-- View Switcher (Segmented Control) -->
+            <div class="flex items-center bg-[#0D1117] rounded-lg p-0.5 border border-[#30363D] text-xs">
+              <button class="px-2.5 py-1 rounded text-[#8B949E] hover:text-white transition-colors">Liệt kê</button>
+              <button class="px-3 py-1 rounded bg-[#21262D] text-white font-medium shadow-sm">Tuần</button>
+              <button class="px-2.5 py-1 rounded text-[#8B949E] hover:text-white transition-colors">Tháng</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Weekly Schedule Table Grid -->
+        <div class="overflow-x-auto relative">
+          <div class="min-w-[880px] select-none">
+            
+            <!-- Table Header: Days of the week -->
+            <div class="grid grid-cols-8 border-b border-[#21262D] bg-[#12161E] text-xs font-medium text-[#8B949E]">
+              <!-- Time Column Header -->
+              <div class="p-3 text-center border-r border-[#21262D] text-[#6E7681] font-mono text-[11px] uppercase tracking-wider flex items-center justify-center">
+                Khung giờ
+              </div>
+
+              <!-- T2 (Đã qua - mờ nhẹ) -->
+              <div class="p-3 text-center border-r border-[#21262D] opacity-60">
+                <p class="font-bold text-white text-xs">T2, 28</p>
+                <p class="text-[10px] text-[#8B949E]">Thứ Hai</p>
+              </div>
+
+              <!-- T3 (Đã qua) -->
+              <div class="p-3 text-center border-r border-[#21262D] opacity-60">
+                <p class="font-bold text-white text-xs">T3, 29</p>
+                <p class="text-[10px] text-[#8B949E]">Thứ Ba</p>
+              </div>
+
+              <!-- T4 (Đã qua) -->
+              <div class="p-3 text-center border-r border-[#21262D] opacity-60">
+                <p class="font-bold text-white text-xs">T4, 30</p>
+                <p class="text-[10px] text-[#8B949E]">Thứ Tư</p>
+              </div>
+
+              <!-- T5 (Đã qua) -->
+              <div class="p-3 text-center border-r border-[#21262D] opacity-60">
+                <p class="font-bold text-white text-xs">T5, 1</p>
+                <p class="text-[10px] text-[#8B949E]">Thứ Năm</p>
+              </div>
+
+              <!-- T6 (HÔM NAY - Highlight nổi bật) -->
+              <div class="p-3 text-center border-r border-indigo-500/40 bg-indigo-600/10 relative">
+                <div class="absolute top-1 right-2">
+                  <span class="inline-block w-2 h-2 rounded-full bg-indigo-400 animate-ping"></span>
+                </div>
+                <div class="inline-flex flex-col items-center">
+                  <span class="font-bold text-white text-xs px-2 py-0.5 rounded-full bg-indigo-600 text-white shadow-sm shadow-indigo-500/40">T6, 2</span>
+                  <span class="text-[10px] font-semibold text-indigo-300 mt-0.5">Hôm nay</span>
+                </div>
+              </div>
+
+              <!-- T7 -->
+              <div class="p-3 text-center border-r border-[#21262D]">
+                <p class="font-bold text-white text-xs">T7, 3</p>
+                <p class="text-[10px] text-[#8B949E]">Thứ Bảy</p>
+              </div>
+
+              <!-- CN -->
+              <div class="p-3 text-center">
+                <p class="font-bold text-white text-xs">CN, 4</p>
+                <p class="text-[10px] text-[#8B949E]">Chủ Nhật</p>
+              </div>
+            </div>
+
+            <!-- Schedule Grid Body (Ca / Tiết) -->
+            <div class="relative bg-[#0D1117]/60">
+              
+              <!-- Red/Rose Current Time Indicator line running across Today (14:30) -->
+              <div class="absolute z-20 pointer-events-none flex items-center" style="top: 245px; left: 0; right: 0;">
+                <div class="w-full border-t-2 border-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]"></div>
+                <div class="absolute right-4 -top-3 bg-rose-600 text-white text-[10px] font-mono px-2 py-0.5 rounded shadow">
+                  Hiện tại: 14:30
+                </div>
+              </div>
+
+              <!-- 7 SA - 8 SA (Sáng 1) -->
+              <div class="grid grid-cols-8">
+                <div class="grid-cell flex flex-col justify-center items-center bg-[#12161E]/40 font-mono text-xs text-[#8B949E]">
+                  <span class="font-semibold text-white">7 SA</span>
+                  <span class="text-[10px] text-[#6E7681]">07:00</span>
+                </div>
+
+                <!-- T2: IS 301 E Cơ Sở Dữ Liệu -->
+                <div class="grid-cell p-1.5 relative opacity-60 hover:opacity-100 transition-opacity">
+                  <div class="h-full rounded-lg bg-[#142334] border-l-4 border-cyan-400 border-t border-r border-b border-cyan-400/20 p-2 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-cyan-300">IS 301 E</span>
+                        <span class="px-1.5 py-0.2 rounded bg-cyan-400/10 text-[9px] font-semibold text-cyan-300 border border-cyan-400/30">Online</span>
+                      </div>
+                      <p class="text-xs font-semibold text-[#F0F6FC] mt-0.5 line-clamp-1 leading-snug">Cơ Sở Dữ Liệu</p>
+                    </div>
+                    <div class="text-[11px] text-[#8B949E] mt-1 space-y-0.5">
+                      <p class="text-[#A5F3FC]">P. Online 20</p>
+                      <p class="font-mono text-[10px] text-[#6E7681]">07:00 – 09:00</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- T3: CS 311 Q Lập Trình Hướng Đối Tượng -->
+                <div class="grid-cell p-1.5 relative opacity-60 hover:opacity-100 transition-opacity">
+                  <div class="h-full rounded-lg bg-[#221C38] border-l-4 border-indigo-400 border-t border-r border-b border-indigo-400/20 p-2 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-indigo-300">CS 311 Q</span>
+                        <span class="px-1.5 py-0.2 rounded bg-indigo-400/10 text-[9px] font-semibold text-indigo-300 border border-indigo-400/30">Offline</span>
+                      </div>
+                      <p class="text-xs font-semibold text-[#F0F6FC] mt-0.5 line-clamp-1 leading-snug">Lập Trình Hướng ĐT</p>
+                    </div>
+                    <div class="text-[11px] text-[#8B949E] mt-1 space-y-0.5">
+                      <p class="text-[#C7D2FE]">P. 308, Hòa Khánh Nam</p>
+                      <p class="font-mono text-[10px] text-[#6E7681]">07:00 – 09:00</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- T4: IS 301 E Cơ Sở Dữ Liệu (Tiết 2) -->
+                <div class="grid-cell p-1.5 relative opacity-60 hover:opacity-100 transition-opacity">
+                  <div class="h-full rounded-lg bg-[#142334] border-l-4 border-cyan-400 border-t border-r border-b border-cyan-400/20 p-2 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-cyan-300">IS 301 E</span>
+                        <span class="px-1.5 py-0.2 rounded bg-cyan-400/10 text-[9px] font-semibold text-cyan-300 border border-cyan-400/30">Offline</span>
+                      </div>
+                      <p class="text-xs font-semibold text-[#F0F6FC] mt-0.5 line-clamp-1 leading-snug">Cơ Sở Dữ Liệu</p>
+                    </div>
+                    <div class="text-[11px] text-[#8B949E] mt-1 space-y-0.5">
+                      <p class="text-[#A5F3FC]">P. 308, 78A Phan Văn Trị</p>
+                      <p class="font-mono text-[10px] text-[#6E7681]">07:00 – 09:00</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- T5 -->
+                <div class="grid-cell"></div>
+                <!-- T6 (Hôm nay column) -->
+                <div class="grid-cell bg-indigo-600/[0.04]"></div>
+                <!-- T7 -->
+                <div class="grid-cell"></div>
+                <!-- CN -->
+                <div class="grid-cell"></div>
+              </div>
+
+              <!-- 8 SA - 9 SA -->
+              <div class="grid grid-cols-8">
+                <div class="grid-cell flex flex-col justify-center items-center bg-[#12161E]/40 font-mono text-xs text-[#8B949E]">
+                  <span class="font-semibold text-white">8 SA</span>
+                  <span class="text-[10px] text-[#6E7681]">08:00</span>
+                </div>
+                <!-- T2 tiếp tục môn -->
+                <div class="grid-cell opacity-60 border-t-0"></div>
+                <!-- T3 tiếp tục môn -->
+                <div class="grid-cell opacity-60 border-t-0"></div>
+                <!-- T4 tiếp tục môn -->
+                <div class="grid-cell opacity-60 border-t-0"></div>
+                <!-- T5 -->
+                <div class="grid-cell"></div>
+                <!-- T6 (Hôm nay) -->
+                <div class="grid-cell bg-indigo-600/[0.04]"></div>
+                <!-- T7 -->
+                <div class="grid-cell"></div>
+                <!-- CN -->
+                <div class="grid-cell"></div>
+              </div>
+
+              <!-- 9 SA - 11 SA (Gom gọn giờ trống với chỉ báo thanh lịch) -->
+              <div class="grid grid-cols-8 bg-[#12161E]/20">
+                <div class="grid-cell flex items-center justify-center font-mono text-[11px] text-[#6E7681]">
+                  9 SA – 11 SA
+                </div>
+                <div class="grid-cell col-span-7 flex items-center px-4 text-[11px] text-[#484F58] italic border-b border-[#21262D]">
+                  — Không có lịch học buổi trưa —
+                </div>
+              </div>
+
+              <!-- 1 CH - 2 CH (Chiều 1) -->
+              <div class="grid grid-cols-8">
+                <div class="grid-cell flex flex-col justify-center items-center bg-[#12161E]/40 font-mono text-xs text-[#8B949E]">
+                  <span class="font-semibold text-white">1 CH</span>
+                  <span class="text-[10px] text-[#6E7681]">13:00</span>
+                </div>
+
+                <!-- T2: DS 103 CA Các Ứng Dụng AI Cơ Bản -->
+                <div class="grid-cell p-1.5 relative opacity-60 hover:opacity-100 transition-opacity">
+                  <div class="h-full rounded-lg bg-[#271F36] border-l-4 border-fuchsia-400 border-t border-r border-b border-fuchsia-400/20 p-2 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-fuchsia-300">DS 103 CA</span>
+                        <span class="px-1.5 py-0.2 rounded bg-fuchsia-400/10 text-[9px] font-semibold text-fuchsia-300 border border-fuchsia-400/30">AI Lab</span>
+                      </div>
+                      <p class="text-xs font-semibold text-[#F0F6FC] mt-0.5 leading-snug">Ứng Dụng AI Cơ Bản</p>
+                    </div>
+                    <div class="text-[11px] text-[#8B949E] mt-1 space-y-0.5">
+                      <p class="text-[#F5D0FE]">P. Online 44</p>
+                      <p class="font-mono text-[10px] text-[#6E7681]">13:00 – 15:00</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- T3 trống -->
+                <div class="grid-cell"></div>
+
+                <!-- T4: PHY 101 K Vật Lý Đại Cương 1 -->
+                <div class="grid-cell p-1.5 relative opacity-60 hover:opacity-100 transition-opacity">
+                  <div class="h-full rounded-lg bg-[#142926] border-l-4 border-emerald-400 border-t border-r border-b border-emerald-400/20 p-2 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-emerald-300">PHY 101 K</span>
+                        <span class="px-1.5 py-0.2 rounded bg-emerald-400/10 text-[9px] font-semibold text-emerald-300 border border-emerald-400/30">Online</span>
+                      </div>
+                      <p class="text-xs font-semibold text-[#F0F6FC] mt-0.5 leading-snug">Vật Lý Đại Cương 1</p>
+                    </div>
+                    <div class="text-[11px] text-[#8B949E] mt-1 space-y-0.5">
+                      <p class="text-[#A7F3D0]">P. Online 6</p>
+                      <p class="font-mono text-[10px] text-[#6E7681]">13:00 – 15:00</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- T5 -->
+                <div class="grid-cell"></div>
+
+                <!-- T6 (HÔM NAY - PHY 101 K Sắp diễn ra) -->
+                <div class="grid-cell p-1.5 relative bg-indigo-600/[0.08]">
+                  <div class="h-full rounded-lg bg-[#142926] border-l-4 border-emerald-400 border-t border-r border-b border-emerald-400/30 p-2 shadow-lg shadow-emerald-950/30 ring-1 ring-emerald-500/20 flex flex-col justify-between transform hover:scale-[1.02] transition-transform">
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-emerald-300">PHY 101 K</span>
+                        <span class="px-1.5 py-0.2 rounded bg-emerald-500/20 text-[9px] font-bold text-emerald-300 border border-emerald-500/40">Phòng 408</span>
+                      </div>
+                      <p class="text-xs font-bold text-[#F0F6FC] mt-0.5 leading-snug">Vật Lý Đại Cương 1</p>
+                    </div>
+                    <div class="text-[11px] mt-1 space-y-0.5">
+                      <p class="text-emerald-200 font-medium">P. 408, 209 Phan Thanh</p>
+                      <p class="font-mono text-[10px] text-emerald-400 font-semibold">13:00 – 15:00</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- T7 -->
+                <div class="grid-cell"></div>
+                <!-- CN -->
+                <div class="grid-cell"></div>
+              </div>
+
+              <!-- 2 CH - 3 CH (Chiều 2) -->
+              <div class="grid grid-cols-8">
+                <div class="grid-cell flex flex-col justify-center items-center bg-[#12161E]/40 font-mono text-xs text-[#8B949E]">
+                  <span class="font-semibold text-white">2 CH</span>
+                  <span class="text-[10px] text-[#6E7681]">14:00</span>
+                </div>
+                <!-- T2 -->
+                <div class="grid-cell"></div>
+
+                <!-- T3: ES 221 AC Bóng Đá Sơ Cấp (Màu cam ấm thể thao) -->
+                <div class="grid-cell p-1.5 relative opacity-60 hover:opacity-100 transition-opacity">
+                  <div class="h-full rounded-lg bg-[#2E1E14] border-l-4 border-amber-500 border-t border-r border-b border-amber-500/20 p-2 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-amber-400">ES 221 AC</span>
+                        <span class="px-1.5 py-0.2 rounded bg-amber-500/10 text-[9px] font-semibold text-amber-400 border border-amber-500/30">Thể chất</span>
+                      </div>
+                      <p class="text-xs font-semibold text-[#F0F6FC] mt-0.5 leading-snug">Bóng Đá Sơ Cấp</p>
+                    </div>
+                    <div class="text-[11px] text-[#8B949E] mt-1 space-y-0.5">
+                      <p class="text-[#FED7AA]">P. Sân thể thao 2, HK Nam</p>
+                      <p class="font-mono text-[10px] text-[#6E7681]">14:00 – 16:15</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- T4 -->
+                <div class="grid-cell"></div>
+                <!-- T5 -->
+                <div class="grid-cell"></div>
+                <!-- T6 (Hôm nay) -->
+                <div class="grid-cell bg-indigo-600/[0.04]"></div>
+                <!-- T7 -->
+                <div class="grid-cell"></div>
+                <!-- CN -->
+                <div class="grid-cell"></div>
+              </div>
+
+              <!-- 6 CH - 8 CH (Tối: CS 297 E Đồ Án CDIO - Đã sửa lỗi mất tiêu đề) -->
+              <div class="grid grid-cols-8">
+                <div class="grid-cell flex flex-col justify-center items-center bg-[#12161E]/40 font-mono text-xs text-[#8B949E]">
+                  <span class="font-semibold text-white">6 CH</span>
+                  <span class="text-[10px] text-[#6E7681]">18:00</span>
+                </div>
+                <!-- T2 -->
+                <div class="grid-cell"></div>
+
+                <!-- T3: CS 297 E Đồ Án CDIO -->
+                <div class="grid-cell p-1.5 relative opacity-60 hover:opacity-100 transition-opacity">
+                  <div class="h-full rounded-lg bg-[#2B1B26] border-l-4 border-rose-400 border-t border-r border-b border-rose-400/20 p-2 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold text-rose-300">CS 297 E</span>
+                        <span class="px-1.5 py-0.2 rounded bg-rose-400/10 text-[9px] font-semibold text-rose-300 border border-rose-400/30">Đồ án</span>
+                      </div>
+                      <!-- Không bị cắt tiêu đề như bản cũ -->
+                      <p class="text-xs font-semibold text-[#F0F6FC] mt-0.5 leading-snug">Đồ Án CDIO (Chuyên ngành)</p>
+                    </div>
+                    <div class="text-[11px] text-[#8B949E] mt-1 space-y-0.5">
+                      <p class="text-[#FECDD3]">P. 408, Tòa Nhà F - HK Nam</p>
+                      <p class="font-mono text-[10px] text-[#6E7681]">17:45 – 21:00</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- T4 -->
+                <div class="grid-cell"></div>
+                <!-- T5 -->
+                <div class="grid-cell"></div>
+                <!-- T6 (Hôm nay) -->
+                <div class="grid-cell bg-indigo-600/[0.04]"></div>
+                <!-- T7 -->
+                <div class="grid-cell"></div>
+                <!-- CN -->
+                <div class="grid-cell"></div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Timetable Footer -->
+        <div class="px-6 py-3 bg-[#12161E] border-t border-[#21262D] flex items-center justify-between text-xs text-[#8B949E]">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Tự động làm mới mỗi 15 phút từ Cổng thông tin Đào tạo Duy Tân</span>
+          </div>
+          <div class="flex items-center gap-4">
+            <a href="#" class="hover:text-indigo-300 transition-colors">Xuất lịch (.ics / Google Calendar)</a>
+            <span class="text-[#484F58]">•</span>
+            <a href="#" class="hover:text-indigo-300 transition-colors">In thời khóa biểu</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- App Bottom Footer -->
+    <footer class="h-9 px-6 border-t border-[#21262D] bg-[#0D1117] flex items-center justify-between text-[11px] text-[#6E7681] flex-shrink-0">
+      <div>
+        © 2026 <span class="text-[#8B949E]">LichHoc DTU</span> • Học tập có kế hoạch. Sống trọn từng ngày.
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Phiên bản 2.4.0 (Dark Mode Pro)</span>
+        <a href="#" class="hover:text-[#8B949E] transition-colors">Trung tâm trợ giúp</a>
+      </div>
+    </footer>
+
+  </main>
+
+</body>
+</html>

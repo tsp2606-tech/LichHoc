@@ -102,7 +102,14 @@ export function CalendarPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, [userManuallySelectedView]);
 
-  const now = new Date(); // Thời gian thực tế hệ thống
+  const [now, setNow] = useState(() => new Date()); // Thời gian thực tế hệ thống (cập nhật realtime)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date());
+    }, 1000); // Cập nhật mỗi giây để đảm bảo realtime chính xác
+    return () => clearInterval(timer);
+  }, []);
 
   // 1. Xác định Thứ Hai của tuần thực tế hiện tại (Tuần của ngày hôm nay)
   const currentRealMonday = useMemo(() => getMonday(now), [now]);
@@ -309,10 +316,28 @@ export function CalendarPage() {
         return;
       }
 
+      // 1. Render từ cache (nếu có) để hiển thị lập tức
+      const cached = localStorage.getItem("lichhoc_schedule_cache");
+      if (cached) {
+        try {
+          const parsedCache = JSON.parse(cached);
+          setApiCourses(parsedCache.map((event, index) => formatCourseFromEvent(event, index)));
+        } catch (e) {
+          console.error("Lỗi khi đọc cache lịch học", e);
+        }
+      }
+
+      // 2. Fetch dữ liệu mới từ API (chạy ngầm, nếu render bị sleep sẽ chờ)
       const schedule = await getMySchedule();
+      
+      // 3. Cập nhật cache và giao diện
+      localStorage.setItem("lichhoc_schedule_cache", JSON.stringify(schedule));
       setApiCourses(schedule.map((event, index) => formatCourseFromEvent(event, index)));
     } catch {
-      setApiCourses([]);
+      // Nếu API lỗi/timeout và chưa có cache thì clear lưới lịch
+      if (!localStorage.getItem("lichhoc_schedule_cache")) {
+        setApiCourses([]);
+      }
     }
   };
 
@@ -340,6 +365,10 @@ export function CalendarPage() {
       }
 
       const schedule = await getMySchedule();
+      
+      // Cập nhật cache mới khi đồng bộ thủ công
+      localStorage.setItem("lichhoc_schedule_cache", JSON.stringify(schedule));
+      
       const formatted = schedule.map((event, index) => formatCourseFromEvent(event, index));
       setApiCourses(formatted);
       setSelectedMonthWeek(null);
@@ -527,11 +556,33 @@ export function CalendarPage() {
 
   return (
     <>
-      <PageHeading
-        eyebrow={`HÔM NAY · ${now.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()}`}
-        title="Thời khóa biểu của tôi 👋"
-        detail="Lịch học được đồng bộ trực tiếp từ MyDTU. Dễ dàng tra cứu và sắp xếp thời gian."
-      />
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginBottom: "20px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", flexWrap: "wrap", gap: "16px" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--d-primary, #6366f1)" }}>
+              <span>HÔM NAY • {now.toLocaleDateString("vi-VN", { weekday: "long", day: "numeric", month: "long" }).toUpperCase()}</span>
+              <span style={{ padding: "2px 8px", borderRadius: "4px", backgroundColor: "var(--d-today-bg, #e0e7ff)", border: "1px solid var(--d-primary, #818cf8)", fontSize: "10px", color: "var(--d-primary, #4f46e5)" }}>Tuần học 8</span>
+            </div>
+            <h1 style={{ fontSize: "24px", fontWeight: "700", color: "var(--d-foreground, #0f172a)", marginTop: "4px", display: "flex", alignItems: "center", gap: "8px" }}>
+              Thời khóa biểu của tôi <span className="animate-bounce">👋</span>
+            </h1>
+            <p style={{ fontSize: "12px", color: "var(--d-muted-foreground, #64748b)", marginTop: "2px" }}>
+              Lịch học được đồng bộ trực tiếp từ MyDTU. Dễ dàng tra cứu và sắp xếp thời gian biểu.
+            </p>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", fontSize: "12px", backgroundColor: "var(--d-card, #f8fafc)", padding: "6px 12px", borderRadius: "8px", border: "1px solid var(--d-card-border, #e2e8f0)", color: "var(--d-muted-foreground, #64748b)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#34d399" }}></span>
+              <span>Môn Online</span>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <span style={{ width: "10px", height: "10px", borderRadius: "50%", backgroundColor: "#facc15" }}></span>
+              <span>Môn Offline</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* #4. Bảng thống kê */}
       <div className="calendar-stat-grid">
@@ -616,7 +667,7 @@ export function CalendarPage() {
       )}
 
       {/* Bảng Thời khóa biểu chuẩn kiểu Telerik RadScheduler như Ảnh 2 */}
-      <section className="panel calendar-panel" style={{ overflow: "hidden", border: "1px solid #e2e8f0" }}>
+      <section className="panel calendar-panel" style={{ overflow: "hidden", border: "1px solid var(--d-border, #e2e8f0)" }}>
         <div className="panel-head">
           <div className="panel-lead">
             <h2>Lịch học của tôi</h2>
@@ -630,21 +681,37 @@ export function CalendarPage() {
               disabled={syncing}
               className="calendar-btn-sync"
               style={{
-                backgroundColor: "#f0fdf4",
-                borderColor: "#86efac",
-                color: "#166534",
+                backgroundColor: "var(--d-sync-bg, #f0fdf4)",
+                borderColor: "var(--d-sync-border, #86efac)",
+                color: "var(--d-sync-text, #166534)",
                 fontWeight: "600",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
               }}
             >
-              {syncing ? "Đang đồng bộ..." : "Đồng bộ dữ liệu"}
+              {syncing ? (
+                <>
+                  <svg className="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                  <span>Đang đồng bộ...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                  <span>Đồng bộ dữ liệu</span>
+                </>
+              )}
             </Button>
-            <div className="calendar-nav-group">
-              <Button variant="outline" onClick={handlePrev} title="Lùi thời gian">‹</Button>
-              <Button variant="outline" onClick={handleToday} title="Trở về tuần hiện tại">Tuần</Button>
-              <Button variant="outline" onClick={handleNext} title="Tiến thời gian">›</Button>
+            <div className="calendar-nav-group" style={{ background: "var(--d-background, #ffffff)", border: "1px solid var(--d-border, #e2e8f0)", padding: "2px", borderRadius: "8px" }}>
+              <Button variant="ghost" onClick={handlePrev} title="Tuần trước" style={{ padding: "4px 6px", height: "auto", color: "var(--d-muted-foreground, #64748b)" }}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/></svg>
+              </Button>
+              <Button variant="ghost" onClick={handleToday} title="Trở về hiện tại" style={{ padding: "4px 10px", height: "auto", fontSize: "12px", fontWeight: "500", color: "var(--d-foreground, #334155)" }}>
+                Tuần
+              </Button>
+              <Button variant="ghost" onClick={handleNext} title="Tuần sau" style={{ padding: "4px 6px", height: "auto", color: "var(--d-muted-foreground, #64748b)" }}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
+              </Button>
             </div>
             <div className="calendar-view-toggles" role="tablist">
               <button
@@ -683,7 +750,7 @@ export function CalendarPage() {
 
         {/* 1. Chế độ xem theo TUẦN (RadScheduler Timeline) */}
         {viewMode === "week" && (
-        <div style={{ overflowX: "auto", minWidth: "100%", background: "#ffffff" }}>
+        <div style={{ overflowX: "auto", minWidth: "100%", background: "var(--d-background, #ffffff)" }}>
           {!isCurrentViewActiveWeek && (
             <div
               style={{
@@ -715,9 +782,9 @@ export function CalendarPage() {
                   justifyContent: "center",
                   fontSize: "11px",
                   fontWeight: "600",
-                  color: "#64748b",
-                  background: "#f8fafc",
-                  borderRight: "1px solid #e2e8f0",
+                  color: "var(--d-muted-foreground, #64748b)",
+                  background: "var(--d-muted, #f8fafc)",
+                  borderRight: "1px solid var(--d-border, #e2e8f0)",
                 }}
               >
                 Cả ngày
@@ -735,29 +802,55 @@ export function CalendarPage() {
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
-                    borderRight: "1px solid #e2e8f0",
+                    borderRight: "1px solid var(--d-border, #e2e8f0)",
                     // #2. Tô màu vàng nếu là ngày hiện tại, các ngày khác màu trắng
-                    backgroundColor: dayObj.isToday ? "#fef08a" : "#ffffff",
-                    color: dayObj.isToday ? "#854d0e" : "#334155",
-                    borderBottom: dayObj.isToday ? "2px solid #eab308" : "none",
+                    backgroundColor: dayObj.isToday ? "var(--d-today-bg, #fef08a)" : "transparent",
+                    color: dayObj.isToday ? "var(--d-today-fg, #854d0e)" : "var(--d-foreground, #334155)",
+                    borderBottom: dayObj.isToday ? "2px solid var(--d-primary, #eab308)" : "none",
                   }}
                 >
                   <span style={{ fontSize: "12px", fontWeight: "700" }}>{dayObj.headerTitle}</span>
-                  <span style={{ fontSize: "10px", color: dayObj.isToday ? "#a16207" : "#94a3b8" }}>{dayObj.dayName}</span>
+                  <span style={{ fontSize: "10px", color: dayObj.isToday ? "var(--d-today-sub, #a16207)" : "var(--d-muted-foreground, #94a3b8)" }}>{dayObj.dayName}</span>
                 </div>
               ))}
             </div>
 
             {/* 2. Thân Lịch Học Dạng Timeline Liên Tục */}
-            <div style={{ display: "flex", position: "relative", height: `${TOTAL_HEIGHT}px`, background: "#ffffff" }}>
+            <div style={{ display: "flex", position: "relative", height: `${TOTAL_HEIGHT}px`, background: "var(--d-background, #ffffff)" }}>
+              {/* Vạch đỏ chỉ giờ hiện tại (hiển thị nếu đang ở tuần hiện tại) */}
+              {isCurrentViewActiveWeek && formatDateKey(monday) === formatDateKey(currentRealMonday) && now.getHours() >= START_HOUR && now.getHours() <= END_HOUR && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: `${Math.max(0, (now.getHours() * 60 + now.getMinutes() - START_HOUR * 60) * (HOUR_HEIGHT / 60))}px`,
+                    left: "60px",
+                    right: 0,
+                    zIndex: 20,
+                    pointerEvents: "none",
+                    display: "flex",
+                    alignItems: "center"
+                  }}
+                >
+                  <div className="current-time-line" style={{ width: "100%", borderTop: "2px solid #f43f5e", boxShadow: "0 0 8px rgba(244, 63, 94, 0.6)" }} />
+                  <div className="current-time-badge" style={{
+                    position: "absolute", right: "16px", top: "-12px",
+                    backgroundColor: "#e11d48", color: "white", fontSize: "10px",
+                    fontFamily: "monospace", padding: "2px 8px", borderRadius: "4px",
+                    boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+                  }}>
+                    Hiện tại: {now.getHours().toString().padStart(2, "0")}:{now.getMinutes().toString().padStart(2, "0")}
+                  </div>
+                </div>
+              )}
+
               {/* Cột trục giờ bên trái */}
               <div
                 style={{
                   width: "60px",
                   minWidth: "60px",
                   height: `${TOTAL_HEIGHT}px`,
-                  background: "#f8fafc",
-                  borderRight: "1px solid #e2e8f0",
+                  background: "var(--d-muted, #f8fafc)",
+                  borderRight: "1px solid var(--d-border, #e2e8f0)",
                   display: "flex",
                   flexDirection: "column",
                   position: "relative",
@@ -775,7 +868,7 @@ export function CalendarPage() {
                       textAlign: "right",
                       fontSize: "11px",
                       fontWeight: "600",
-                      color: "#475569",
+                      color: "var(--d-muted-foreground, #475569)",
                       position: "relative",
                     }}
                   >
@@ -787,7 +880,7 @@ export function CalendarPage() {
                         right: 0,
                         top: "30px",
                         width: "8px",
-                        borderTop: "1px solid #cbd5e1",
+                        borderTop: "1px solid var(--d-border, #cbd5e1)",
                       }}
                     />
                   </div>
@@ -807,9 +900,9 @@ export function CalendarPage() {
                       minWidth: "105px",
                       height: `${TOTAL_HEIGHT}px`,
                       position: "relative",
-                      borderRight: "1px solid #e2e8f0",
+                      borderRight: "1px solid var(--d-border, #e2e8f0)",
                       // #2. BÔI VÀNG TỪ ĐẦU ĐẾN CUỐI CỘT MÀU VÀNG GIỐNG ẢNH 2
-                      backgroundColor: dayObj.isToday ? "#fef9c3" : "#ffffff",
+                      backgroundColor: dayObj.isToday ? "var(--d-col-highlight, #fef9c3)" : "transparent",
                     }}
                   >
                     {/* Các đường kẻ ngang mỗi tiếng */}
@@ -822,7 +915,7 @@ export function CalendarPage() {
                           left: 0,
                           right: 0,
                           height: `${HOUR_HEIGHT}px`,
-                          borderBottom: "1px solid #edf0f5",
+                          borderBottom: "1px solid var(--d-border, #edf0f5)",
                           boxSizing: "border-box",
                         }}
                       >
@@ -833,7 +926,7 @@ export function CalendarPage() {
                             top: "30px",
                             left: 0,
                             right: 0,
-                            borderTop: "1px dashed #f1f5f9",
+                            borderTop: "1px dashed var(--d-border, #f1f5f9)",
                           }}
                         />
                       </div>
@@ -851,11 +944,12 @@ export function CalendarPage() {
                       const durationMin = eMin - sMin;
                       const height = Math.max(34, durationMin * (HOUR_HEIGHT / 60) - 3);
 
-                      // Style thẻ môn học giống ảnh 2 (online màu xanh, offline màu vàng nhạt)
+                      // Môn học online màu xanh lá, offline màu vàng
                       const isOnline = c.isOnline;
-                      const bgCard = isOnline ? "#c0ffc0" : "#fff0b3";
-                      const borderCard = isOnline ? "#82e282" : "#e6c65b";
-                      const textCard = isOnline ? "#0f5132" : "#78350f";
+
+                      const bgCard = isOnline ? "var(--d-bg-online, #c0ffc0)" : "var(--d-bg-offline, #fff0b3)";
+                      const borderCard = isOnline ? "var(--d-border-online, #82e282)" : "var(--d-border-offline, #e6c65b)";
+                      const textCard = isOnline ? "var(--d-text-online, #0f5132)" : "var(--d-text-offline, #78350f)";
 
                       return (
                         <div
@@ -946,7 +1040,7 @@ export function CalendarPage() {
 
         {/* 2. Chế độ xem theo THÁNG */}
         {viewMode === "month" && (
-          <div style={{ overflowX: "auto", minWidth: "100%", background: "#ffffff", padding: "16px 20px" }}>
+          <div style={{ overflowX: "auto", minWidth: "100%", background: "var(--d-background, #ffffff)", padding: "16px 20px" }}>
             <div style={{ minWidth: "760px" }}>
               {/* Tiêu đề 7 ngày trong tuần */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "8px", marginBottom: "10px" }}>
@@ -958,9 +1052,9 @@ export function CalendarPage() {
                       textAlign: "center",
                       fontWeight: "700",
                       fontSize: "12px",
-                      color: idx >= 5 ? "#dc2626" : "#475569",
-                      backgroundColor: "#f8fafc",
-                      border: "1px solid #e2e8f0",
+                      color: idx >= 5 ? "var(--d-destructive, #dc2626)" : "var(--d-muted-foreground, #475569)",
+                      backgroundColor: "var(--d-muted, #f8fafc)",
+                      border: "1px solid var(--d-border, #e2e8f0)",
                       borderRadius: "8px",
                     }}
                   >
@@ -1001,19 +1095,19 @@ export function CalendarPage() {
                       style={{
                         minHeight: "115px",
                         border: cell.isToday
-                          ? "2px solid #eab308"
+                          ? "2px solid var(--d-primary, #eab308)"
                           : isCellInActiveWeek && cell.isCurrentMonth
-                          ? "1.5px solid #60a5fa"
-                          : "1px solid #e2e8f0",
+                          ? "1.5px solid var(--d-chart-1, #60a5fa)"
+                          : "1px solid var(--d-border, #e2e8f0)",
                         borderRadius: "10px",
                         padding: "8px",
                         backgroundColor: cell.isToday
-                          ? "#fefce8"
+                          ? "var(--d-col-highlight, #fefce8)"
                           : isCellInActiveWeek && cell.isCurrentMonth
-                          ? "#f8faff"
+                          ? "var(--d-card, #f8faff)"
                           : cell.isCurrentMonth
-                          ? "#ffffff"
-                          : "#f8fafc",
+                          ? "transparent"
+                          : "var(--d-muted, #f8fafc)",
                         cursor: "pointer",
                         transition: "all 0.15s ease",
                         display: "flex",
@@ -1038,20 +1132,20 @@ export function CalendarPage() {
                           style={{
                             fontSize: "12.5px",
                             fontWeight: cell.isToday ? "800" : isCellInActiveWeek ? "700" : cell.isCurrentMonth ? "600" : "400",
-                            color: cell.isToday ? "#854d0e" : isCellInActiveWeek ? "#1d4ed8" : cell.isCurrentMonth ? "#1e293b" : "#94a3b8",
+                            color: cell.isToday ? "var(--d-today-fg, #854d0e)" : isCellInActiveWeek ? "var(--d-primary, #1d4ed8)" : cell.isCurrentMonth ? "var(--d-foreground, #1e293b)" : "var(--d-muted-foreground, #94a3b8)",
                             width: cell.isToday ? "24px" : "auto",
                             height: cell.isToday ? "24px" : "auto",
                             borderRadius: "50%",
                             display: "inline-flex",
                             alignItems: "center",
                             justifyContent: "center",
-                            background: cell.isToday ? "#fef08a" : "transparent",
+                            background: cell.isToday ? "var(--d-today-bg, #fef08a)" : "transparent",
                           }}
                         >
                           {cell.dayNumber}
                         </span>
                         {cell.isToday && (
-                          <span style={{ fontSize: "9.5px", fontWeight: "700", color: "#854d0e", background: "#fef9c3", padding: "1px 6px", borderRadius: "4px" }}>
+                          <span style={{ fontSize: "9.5px", fontWeight: "700", color: "var(--d-today-sub, #854d0e)", background: "var(--d-col-highlight, #fef9c3)", padding: "1px 6px", borderRadius: "4px" }}>
                             Hôm nay
                           </span>
                         )}
@@ -1082,9 +1176,9 @@ export function CalendarPage() {
                                 borderRadius: "4px",
                                 fontSize: "10.5px",
                                 fontWeight: "600",
-                                backgroundColor: "#eff6ff",
-                                color: "#1d4ed8",
-                                border: "1px solid #bfdbfe",
+                                backgroundColor: "var(--d-primary, #eff6ff)",
+                                color: "var(--d-primary-foreground, #1d4ed8)",
+                                border: "1px solid var(--d-primary, #bfdbfe)",
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",

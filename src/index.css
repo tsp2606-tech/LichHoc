@@ -4235,3 +4235,184 @@ td svg {
     transition-duration: .01ms !important;
   }
 }
+
+/* Dark mode overrides for UI elements */
+.dark {
+  --d-background: #0D1117;
+  --d-sidebar: #12161E;
+  --d-card: #161B22;
+  --d-muted: #1C2128;
+  --d-border: #21262D;
+  --d-card-border: #262C36;
+  --d-accent: #6366F1;
+  --d-accent-foreground: #ffffff;
+  --d-foreground: #F0F6FC;
+  --d-primary: #6366F1;
+  --d-muted-foreground: #8B949E;
+  --d-primary-foreground: #ffffff;
+  --d-destructive: #ef4444;
+  
+  /* Custom Calendar Dark Variables */
+  --d-today-bg: rgba(99, 102, 241, 0.15);
+  --d-today-fg: #818CF8;
+  --d-today-sub: #6366F1;
+  --d-col-highlight: rgba(99, 102, 241, 0.04);
+  
+  /* Sync Button Dark Mode */
+  --d-sync-bg: rgba(79, 70, 229, 0.2);
+  --d-sync-border: rgba(99, 102, 241, 0.3);
+  --d-sync-text: #a5b4fc;
+  
+  /* Course Cards Online/Offline in Dark Mode */
+  --d-bg-online: #142926;
+  --d-border-online: #34D399;
+  --d-text-online: #34D399;
+  
+  --d-bg-offline: #2E1E14;
+  --d-border-offline: #F59E0B;
+  --d-text-offline: #F59E0B;
+}
+
+.dark body, .dark .app-shell, .dark .main-column {
+  background: var(--d-background) !important;
+  color: var(--d-foreground) !important;
+}
+.dark .sidebar, .dark .topbar {
+  background: var(--d-sidebar) !important;
+  border-color: var(--d-border) !important;
+}
+.dark .semester-card, .dark .search-box, .dark .notification-panel {
+  background: var(--d-card) !important;
+  border-color: var(--d-card-border) !important;
+  color: var(--d-foreground) !important;
+}
+.dark .nav-link:hover {
+  background: var(--d-muted) !important;
+  color: var(--d-foreground) !important;
+}
+.dark .nav-link.active {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+  color: #818CF8 !important;
+}
+.dark .crumb, .dark .side-label, .dark .eyebrow {
+  color: var(--d-muted-foreground) !important;
+}
+.dark .crumb b, .dark .user-chip, .dark .brand b, .dark .brand small, .dark .profile-mini b {
+  color: var(--d-foreground) !important;
+}
+.dark .search-box input, .dark .search-box input::placeholder {
+  color: var(--d-foreground) !important;
+}
+.dark .icon-button {
+  color: var(--d-muted-foreground) !important;
+}
+.dark .profile-mini small {
+  color: var(--d-muted-foreground) !important;
+}
+.dark .calendar-stat-grid .stat-card {
+  background: var(--d-card) !important;
+  border-color: var(--d-card-border) !important;
+}
+
+/* Specialized Dark Mode Stat Cards */
+.dark .calendar-stat-classes {
+  background: #161B22 !important;
+  border-color: #262C36 !important;
+}
+.dark .calendar-stat-classes .stat-icon {
+  background: rgba(99, 102, 241, 0.1) !important;
+  color: #818CF8 !important;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+}
+
+.dark .calendar-stat-next {
+  background: linear-gradient(to bottom right, #161B22, rgba(30, 27, 75, 0.2)) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 10px 15px -3px rgba(30, 27, 75, 0.2) !important;
+}
+.dark .calendar-stat-next .stat-icon {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #a5b4fc !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+}
+.dark .calendar-stat-next b, .dark .calendar-stat-next .stat-value {
+  color: #ffffff !important;
+}
+
+.dark .calendar-stat-status {
+  background: #161B22 !important;
+  border-color: #262C36 !important;
+}
+.dark .calendar-stat-status .stat-icon {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #34d399 !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+.dark .calendar-stat-status b, .dark .calendar-stat-status .stat-value {
+  color: #34d399 !important;
+}
+
+/* Sidebar Brand Dark Mode */
+.dark .brand-mark {
+  background: linear-gradient(to top right, #4f46e5, #818cf8) !important;
+  color: white !important;
+  box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.25) !important;
+  border: none !important;
+}
+
+.dark .nav-link.active .nav-count {
+  background: rgba(99, 102, 241, 0.2) !important;
+  color: #a5b4fc !important;
+  border: 1px solid rgba(99, 102, 241, 0.2) !important;
+}
+.dark .calendar-panel, .dark .calendar-list-container {
+  border-color: var(--d-card-border) !important;
+  background: var(--d-card) !important;
+}
+.dark .calendar-panel .panel-head {
+  border-bottom-color: var(--d-border) !important;
+}
+.dark .calendar-list-day-card {
+  background: var(--d-card) !important;
+  border-color: var(--d-card-border) !important;
+}
+.dark .calendar-list-course-card {
+  background: var(--d-muted) !important;
+  border-color: var(--d-card-border) !important;
+}
+.dark .course-card-details strong, .dark .day-title-text, .dark .day-course-count {
+  color: var(--d-foreground) !important;
+}
+.dark .course-card-time span, .dark .course-duration, .dark .meta-room, .dark .meta-teacher {
+  color: var(--d-muted-foreground) !important;
+}
+
+/* Sync Button Hover in Dark Mode */
+.dark .calendar-btn-sync:hover {
+  background: #4f46e5 !important;
+  color: #ffffff !important;
+}
+
+/* Nav Group Buttons in Dark Mode */
+.dark .calendar-nav-group button:hover {
+  background: #21262D !important;
+  color: #ffffff !important;
+}
+
+/* View Toggles (List/Week/Month) in Dark Mode */
+.dark .calendar-view-toggles {
+  background: #0D1117 !important;
+  border: 1px solid #30363D !important;
+}
+.dark .calendar-view-toggles .view-toggle {
+  color: #8B949E !important;
+}
+.dark .calendar-view-toggles .view-toggle:hover {
+  color: #ffffff !important;
+}
+.dark .calendar-view-toggles .view-toggle.selected {
+  background: #21262D !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
