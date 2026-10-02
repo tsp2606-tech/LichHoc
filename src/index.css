@@ -4307,6 +4307,101 @@ td svg {
 .dark .icon-button {
   color: var(--d-muted-foreground) !important;
 }
+
+/* Light Mode Sync Button & Nav Group Styles */
+.calendar-btn-sync {
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+  border: 1px solid #86efac !important;
+  transition: all 0.2s ease-in-out !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  gap: 6px !important;
+}
+.calendar-btn-sync:hover:not(:disabled) {
+  background: #dcfce7 !important;
+  border-color: #4ade80 !important;
+}
+
+.calendar-nav-group, .calendar-view-toggles {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  padding: 2px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.calendar-nav-group button, .calendar-view-toggles button {
+  color: #64748b !important;
+  transition: all 0.2s ease-in-out !important;
+  border-radius: 6px !important;
+  padding: 4px 10px !important;
+  height: auto !important;
+}
+.calendar-nav-group button:hover, .calendar-view-toggles button:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+.calendar-view-toggles button.selected {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  font-weight: 600 !important;
+}
+
+/* Sync Button & Nav Group Premium Dark Mode Styles */
+.dark .calendar-btn-sync {
+  background: rgba(79, 70, 229, 0.2) !important;
+  color: #a5b4fc !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  transition: all 0.2s ease-in-out !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  border-radius: 8px !important;
+  padding: 6px 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  white-space: nowrap !important;
+  gap: 6px !important;
+}
+.dark .calendar-btn-sync:hover:not(:disabled) {
+  background: #4f46e5 !important;
+  color: #ffffff !important;
+  border-color: #4f46e5 !important;
+}
+
+.dark .calendar-nav-group, .dark .calendar-view-toggles {
+  background-color: #0D1117 !important;
+  border: 1px solid #30363D !important;
+  padding: 2px !important;
+  border-radius: 8px !important;
+}
+
+.dark .calendar-nav-group button, .dark .calendar-view-toggles button {
+  color: #8B949E !important;
+  transition: all 0.2s ease-in-out !important;
+  border-radius: 6px !important;
+}
+.dark .calendar-nav-group button:hover, .dark .calendar-view-toggles button:hover {
+  background-color: #21262D !important;
+  color: #ffffff !important;
+}
+.dark .calendar-view-toggles button.selected {
+  background-color: #21262D !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+  font-weight: 500 !important;
+}
 .dark .profile-mini small {
   color: var(--d-muted-foreground) !important;
 }

@@ -673,22 +673,12 @@ export function CalendarPage() {
             <h2>Lịch học của tôi</h2>
             <p>{subtitleText}</p>
           </div>
-          <div className="calendar-tools">
+          <div className="calendar-tools" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
             <Button
               variant="outline"
-              icon={RefreshCw}
               onClick={handleSync}
               disabled={syncing}
               className="calendar-btn-sync"
-              style={{
-                backgroundColor: "var(--d-sync-bg, #f0fdf4)",
-                borderColor: "var(--d-sync-border, #86efac)",
-                color: "var(--d-sync-text, #166534)",
-                fontWeight: "600",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
             >
               {syncing ? (
                 <>
@@ -702,14 +692,14 @@ export function CalendarPage() {
                 </>
               )}
             </Button>
-            <div className="calendar-nav-group" style={{ background: "var(--d-background, #ffffff)", border: "1px solid var(--d-border, #e2e8f0)", padding: "2px", borderRadius: "8px" }}>
-              <Button variant="ghost" onClick={handlePrev} title="Tuần trước" style={{ padding: "4px 6px", height: "auto", color: "var(--d-muted-foreground, #64748b)" }}>
+            <div className="calendar-nav-group">
+              <Button variant="ghost" onClick={handlePrev} title="Tuần trước" style={{ padding: "4px 6px", height: "auto" }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/></svg>
               </Button>
-              <Button variant="ghost" onClick={handleToday} title="Trở về hiện tại" style={{ padding: "4px 10px", height: "auto", fontSize: "12px", fontWeight: "500", color: "var(--d-foreground, #334155)" }}>
+              <Button variant="ghost" onClick={handleToday} title="Trở về hiện tại" style={{ padding: "4px 10px", height: "auto", fontSize: "12px", fontWeight: "500" }}>
                 Tuần
               </Button>
-              <Button variant="ghost" onClick={handleNext} title="Tuần sau" style={{ padding: "4px 6px", height: "auto", color: "var(--d-muted-foreground, #64748b)" }}>
+              <Button variant="ghost" onClick={handleNext} title="Tuần sau" style={{ padding: "4px 6px", height: "auto" }}>
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"/></svg>
               </Button>
             </div>
