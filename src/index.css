@@ -4712,6 +4712,159 @@ td svg {
   }
 }
 
+/* Use the supplied artwork as the shared backdrop across every app route. */
+:root {
+  --lichhoc-artwork: url("https://i.pinimg.com/600x/60/bf/69/60bf696ff5c91a24e88023aff69a7fb9.jpg");
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(135deg, rgba(12, 20, 40, .30), rgba(21, 19, 43, .20)),
+    var(--lichhoc-artwork);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Let the common image show through the app's page-sized containers. */
+.app-shell,
+.main-column,
+.page-content,
+.landing,
+.auth-layout,
+.extension-auth-layout,
+.dark .app-shell,
+.dark .main-column,
+.dark .page-content,
+.dark .landing,
+.dark .auth-layout,
+.dark .extension-auth-layout,
+:root[data-theme="dark"] .app-shell,
+:root[data-theme="dark"] .main-column,
+:root[data-theme="dark"] .page-content,
+:root[data-theme="dark"] .landing,
+:root[data-theme="dark"] .auth-layout,
+:root[data-theme="dark"] .extension-auth-layout {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Give navigation and content panels a readable glass surface. */
+.sidebar,
+.topbar,
+.notification-panel,
+.panel,
+.stat-card,
+.calendar-panel,
+.table-panel,
+.chart-panel,
+.service-panel,
+.settings-panel,
+.semester-card,
+.landing-schedule,
+.auth-form-side,
+.extension-auth-card {
+  background-color: rgba(255, 255, 255, .76) !important;
+  border-color: rgba(148, 163, 184, .34) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.dark .sidebar,
+.dark .topbar,
+.dark .notification-panel,
+.dark .panel,
+.dark .stat-card,
+.dark .calendar-panel,
+.dark .table-panel,
+.dark .chart-panel,
+.dark .service-panel,
+.dark .settings-panel,
+.dark .semester-card,
+.dark .landing-schedule,
+.dark .auth-form-side,
+.dark .extension-auth-card,
+:root[data-theme="dark"] .sidebar,
+:root[data-theme="dark"] .topbar,
+:root[data-theme="dark"] .notification-panel,
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .stat-card,
+:root[data-theme="dark"] .calendar-panel,
+:root[data-theme="dark"] .table-panel,
+:root[data-theme="dark"] .chart-panel,
+:root[data-theme="dark"] .service-panel,
+:root[data-theme="dark"] .settings-panel,
+:root[data-theme="dark"] .semester-card,
+:root[data-theme="dark"] .landing-schedule,
+:root[data-theme="dark"] .auth-form-side,
+:root[data-theme="dark"] .extension-auth-card {
+  background-color: rgba(15, 23, 42, .78) !important;
+  border-color: rgba(148, 163, 184, .26) !important;
+}
+
+/* Keep the login form legible over the more transparent surface. */
+.auth-form-side .auth-form h2,
+.auth-form-side .auth-form h1 {
+  color: #172554 !important;
+}
+
+.auth-form-side .auth-form > p,
+.auth-form-side .auth-form label,
+.auth-form-side .back-home {
+  color: #334155 !important;
+}
+
+.auth-form-side .auth-form input {
+  color: #172033 !important;
+  background: rgba(255, 255, 255, .76) !important;
+  border-color: rgba(100, 116, 139, .38) !important;
+}
+
+.dark .auth-form-side .auth-form h2,
+.dark .auth-form-side .auth-form h1,
+:root[data-theme="dark"] .auth-form-side .auth-form h2,
+:root[data-theme="dark"] .auth-form-side .auth-form h1 {
+  color: #f8fafc !important;
+}
+
+.dark .auth-form-side .auth-form > p,
+.dark .auth-form-side .auth-form label,
+.dark .auth-form-side .back-home,
+:root[data-theme="dark"] .auth-form-side .auth-form > p,
+:root[data-theme="dark"] .auth-form-side .auth-form label,
+:root[data-theme="dark"] .auth-form-side .back-home {
+  color: #dbe5f4 !important;
+}
+
+.dark .auth-form-side .auth-form input,
+:root[data-theme="dark"] .auth-form-side .auth-form input {
+  color: #f8fafc !important;
+  background: rgba(15, 23, 42, .62) !important;
+  border-color: rgba(203, 213, 225, .34) !important;
+}
+
+.dark .auth-form-side .auth-form input::placeholder,
+:root[data-theme="dark"] .auth-form-side .auth-form input::placeholder {
+  color: #b6c2d3 !important;
+}
+
 /* Pinterest-inspired login backdrop: keep the supplied artwork behind the form. */
 .auth-layout {
   position: relative;
