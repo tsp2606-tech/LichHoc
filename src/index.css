@@ -4511,3 +4511,57 @@ td svg {
   color: #ffffff !important;
   box-shadow: none !important;
 }
+
+/* Keep page and table text readable against both theme backgrounds. */
+:root[data-theme="light"] .page-heading h1,
+:root[data-theme="light"] .panel-head h2,
+:root[data-theme="light"] .stat-card .stat-value,
+:root[data-theme="light"] .course-cell b {
+  color: #1e293b;
+}
+
+:root[data-theme="light"] .page-heading p,
+:root[data-theme="light"] .stat-card .stat-label,
+:root[data-theme="light"] .stat-card .stat-note,
+:root[data-theme="light"] .course-cell small,
+:root[data-theme="light"] .table-panel th,
+:root[data-theme="light"] .table-panel td,
+:root[data-theme="light"] .row-actions button,
+:root[data-theme="light"] .table-footer {
+  color: #475569;
+}
+
+:root[data-theme="light"] .code-pill {
+  color: #334155;
+}
+
+:root[data-theme="light"] .table-panel thead {
+  background: #f1f5f9;
+}
+
+:root[data-theme="dark"] .page-heading h1,
+:root[data-theme="dark"] .panel-head h2,
+:root[data-theme="dark"] .stat-card .stat-value,
+:root[data-theme="dark"] .course-cell b {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .page-heading p,
+:root[data-theme="dark"] .stat-card .stat-label,
+:root[data-theme="dark"] .stat-card .stat-note,
+:root[data-theme="dark"] .course-cell small,
+:root[data-theme="dark"] .table-panel th,
+:root[data-theme="dark"] .table-panel td,
+:root[data-theme="dark"] .row-actions button,
+:root[data-theme="dark"] .table-footer {
+  color: #bdc9da !important;
+}
+
+:root[data-theme="dark"] .table-panel thead {
+  background: #202c40 !important;
+}
+
+:root[data-theme="dark"] .code-pill {
+  background: #273449 !important;
+  color: #e2e8f0 !important;
+}
