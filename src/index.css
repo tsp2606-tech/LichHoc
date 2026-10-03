@@ -5314,3 +5314,44 @@ body::before {
 .dark .course-cell small {
   color: #cbd5e1 !important;
 }
+
+/* In light mode the photo can sit behind the page heading and calendar labels. */
+:root[data-theme="light"] .page-heading .eyebrow {
+  color: #1e3a8a !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, .95);
+}
+
+:root[data-theme="light"] .page-heading h1 {
+  color: #0f172a !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, .92);
+}
+
+:root[data-theme="light"] .page-heading p {
+  color: #1e293b !important;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, .98);
+}
+
+:root[data-theme="light"] .topbar .crumb,
+:root[data-theme="light"] .topbar .crumb span,
+:root[data-theme="light"] .topbar .crumb-slash {
+  color: #334155 !important;
+}
+
+:root[data-theme="light"] .topbar .crumb b {
+  color: #1e3a8a !important;
+}
+
+:root[data-theme="light"] .day-head,
+:root[data-theme="light"] .day-head b,
+:root[data-theme="light"] .time-label,
+:root[data-theme="light"] .calendar-list-day-header,
+:root[data-theme="light"] .calendar-list-day-header .day-title-text,
+:root[data-theme="light"] .calendar-list-day-header .day-course-count {
+  color: #334155 !important;
+}
+
+:root[data-theme="light"] .day-head span,
+:root[data-theme="light"] .calendar-toolbar,
+:root[data-theme="light"] .calendar-panel small {
+  color: #475569 !important;
+}
