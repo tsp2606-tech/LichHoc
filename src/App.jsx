@@ -63,6 +63,14 @@ function App() {
     setPage("login");
   };
 
+  const handleGlobalSearch = (query) => {
+    if (page === "manage") {
+      window.dispatchEvent(new CustomEvent("lichhoc:globalSearch", { detail: { query } }));
+      return;
+    }
+    location.hash = `#/manage?search=${encodeURIComponent(query)}`;
+  };
+
   if (page === "home") return <LandingPage go={go} />;
   if (page === "login" || page === "register") return <AuthPage mode={page} go={go} />;
 
@@ -73,7 +81,7 @@ function App() {
     <div className="app-shell">
       <Sidebar page={page} go={go} user={user} onLogout={handleLogout} />
       <div className="main-column">
-        <Topbar title={titles[page] || titles.calendar} user={user} onLogout={handleLogout} isDark={isDark} onToggleTheme={() => setIsDark((current) => !current)} />
+        <Topbar title={titles[page] || titles.calendar} user={user} onLogout={handleLogout} isDark={isDark} onToggleTheme={() => setIsDark((current) => !current)} onSearch={handleGlobalSearch} />
         <main className="page-content">
           <div key={page} className="page-transition">
             {pages[page] || pages.calendar}

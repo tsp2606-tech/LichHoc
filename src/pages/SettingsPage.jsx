@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { GraduationCap, CheckCircle2, AlertCircle } from "lucide-react";
+import { CalendarDays, GraduationCap, CheckCircle2, AlertCircle } from "lucide-react";
 import { PageHeading, Badge } from "../components/AppShell";
 import { getCurrentUser, setCurrentUser, updateUserProfile, getUserProfile } from "../lib/api";
 import { getNotifications } from "../lib/notifications";

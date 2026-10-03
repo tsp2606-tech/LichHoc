@@ -8,6 +8,10 @@ import { ErrorDialog } from "../components/ErrorDialog";
 
 export function ManagePage() {
   const [courses, setCourses] = useState(classes);
+  const [searchQuery, setSearchQuery] = useState(() => {
+    const params = new URLSearchParams(location.hash.split("?")[1] || "");
+    return params.get("search") || "";
+  });
   const [editingCourse, setEditingCourse] = useState(null);
   const [draft, setDraft] = useState({ name: "", room: "", teacher: "", time: "", day: "" });
   const [notice, setNotice] = useState("");
@@ -33,6 +37,20 @@ export function ManagePage() {
   useEffect(() => {
     loadCourses();
   }, []);
+
+  useEffect(() => {
+    const handleGlobalSearch = (event) => setSearchQuery(event.detail?.query || "");
+    window.addEventListener("lichhoc:globalSearch", handleGlobalSearch);
+    return () => window.removeEventListener("lichhoc:globalSearch", handleGlobalSearch);
+  }, []);
+
+  const filteredCourses = courses.filter((course) => {
+    const searchableText = [course.name, course.code, course.room, course.teacher, course.day, course.time, course.status]
+      .filter(Boolean)
+      .join(" ")
+      .toLocaleLowerCase("vi");
+    return searchableText.includes(searchQuery.trim().toLocaleLowerCase("vi"));
+  });
 
   const startEditing = (course) => {
     setEditingCourse(course);
@@ -144,7 +162,7 @@ export function ManagePage() {
 
       <section className="panel table-panel">
         <div className="table-toolbar">
-          <div className="search-box table-search"><Search size={16} /><input placeholder="Tìm theo môn học, giảng viên, phòng..." /></div>
+          <div className="search-box table-search"><Search size={16} /><input aria-label="Tìm môn học, giảng viên hoặc phòng" value={searchQuery} onChange={(event) => setSearchQuery(event.target.value)} placeholder="Tìm theo môn học, giảng viên, phòng..." /></div>
           <Button variant="outline" icon={Filter}>Bộ lọc</Button>
           <select aria-label="Học kỳ"><option>Học kỳ 1 · 2025–2026</option></select>
           <Button variant="outline" icon={Upload}>Xuất dữ liệu</Button>
@@ -163,7 +181,7 @@ export function ManagePage() {
               </tr>
             </thead>
             <tbody>
-              {courses.map((c, i) => (
+              {filteredCourses.map((c, i) => (
                 <tr key={`${c.code}-${i}`}>
                   <td>
                     <div className="course-cell">
@@ -184,10 +202,15 @@ export function ManagePage() {
                   </td>
                 </tr>
               ))}
+              {filteredCourses.length === 0 && (
+                <tr>
+                  <td colSpan="7" className="search-empty-state">Không tìm thấy lớp học phù hợp với “{searchQuery}”.</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
-        <div className="table-footer">Hiển thị <b>1–{courses.length}</b> trong <b>{courses.length}</b> lớp học <div><button>‹</button><button className="current-page">1</button><button>›</button></div></div>
+        <div className="table-footer">Hiển thị <b>{filteredCourses.length ? `1–${filteredCourses.length}` : "0"}</b> trong <b>{filteredCourses.length}</b> lớp học <div><button>‹</button><button className="current-page">1</button><button>›</button></div></div>
       </section>
 
       <ErrorDialog

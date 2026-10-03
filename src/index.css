@@ -5140,3 +5140,83 @@ body::before {
   background: rgba(203, 213, 225, .14);
   color: #fff;
 }
+
+/* Improve text contrast over the photo backgrounds in both themes. */
+:root[data-theme="light"] body,
+:root:not([data-theme="dark"]) body {
+  color: #26354d;
+}
+
+:root[data-theme="light"] .page-heading h1,
+:root:not([data-theme="dark"]) .page-heading h1,
+:root[data-theme="light"] .panel h2,
+:root:not([data-theme="dark"]) .panel h2,
+:root[data-theme="light"] .settings-title h2,
+:root:not([data-theme="dark"]) .settings-title h2,
+:root[data-theme="light"] .table-panel th,
+:root:not([data-theme="dark"]) .table-panel th,
+:root[data-theme="light"] .course-cell b,
+:root:not([data-theme="dark"]) .course-cell b {
+  color: #17243a !important;
+}
+
+:root[data-theme="light"] .page-heading p,
+:root:not([data-theme="dark"]) .page-heading p,
+:root[data-theme="light"] .panel p,
+:root:not([data-theme="dark"]) .panel p,
+:root[data-theme="light"] .course-cell small,
+:root:not([data-theme="dark"]) .course-cell small,
+:root[data-theme="light"] .side-label,
+:root:not([data-theme="dark"]) .side-label,
+:root[data-theme="light"] .semester-card > span,
+:root:not([data-theme="dark"]) .semester-card > span {
+  color: #475569 !important;
+}
+
+.search-empty-state {
+  padding: 28px 14px;
+  text-align: center;
+  color: #475569;
+}
+
+:root[data-theme="dark"] body,
+.dark body {
+  color: #e5edf8;
+}
+
+:root[data-theme="dark"] .page-heading h1,
+.dark .page-heading h1,
+:root[data-theme="dark"] .panel h2,
+.dark .panel h2,
+:root[data-theme="dark"] .settings-title h2,
+.dark .settings-title h2,
+:root[data-theme="dark"] .table-panel th,
+.dark .table-panel th,
+:root[data-theme="dark"] .course-cell b,
+.dark .course-cell b {
+  color: #f8fafc !important;
+}
+
+:root[data-theme="dark"] .page-heading p,
+.dark .page-heading p,
+:root[data-theme="dark"] .panel p,
+.dark .panel p,
+:root[data-theme="dark"] .course-cell small,
+.dark .course-cell small,
+:root[data-theme="dark"] .side-label,
+.dark .side-label,
+:root[data-theme="dark"] .semester-card > span,
+.dark .semester-card > span,
+:root[data-theme="dark"] .search-empty-state,
+.dark .search-empty-state {
+  color: #cbd5e1 !important;
+}
+
+:root[data-theme="dark"] .table-panel td,
+.dark .table-panel td,
+:root[data-theme="dark"] .field > span,
+.dark .field > span,
+:root[data-theme="dark"] .nav-link,
+.dark .nav-link {
+  color: #e2e8f0;
+}

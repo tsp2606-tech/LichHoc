@@ -9,7 +9,7 @@ const navItems = [
 ];
 export function Brand() { return <a className="brand" href="#/calendar"><span className="brand-mark"><CalendarDays size={21} /></span><span><b>LichHoc</b><small>Không gian học tập của bạn</small></span></a>; }
 
-export function Sidebar({ page, go, user, onLogout }) {
+export function Sidebar({ page, go, user }) {
   const userName = user?.name || (user?.email ? user.email.split("@")[0].replace(/[._]/g, " ") : "Sinh viên");
   const initial = userName.charAt(0).toUpperCase() || "S";
   const visibleNav = navItems.filter(([id]) => id !== "admin" || Boolean(user?.is_admin));
@@ -48,7 +48,6 @@ export function Sidebar({ page, go, user, onLogout }) {
             <b>{userName}</b>
             <small>{user?.is_admin ? "Quản trị viên (Admin)" : "Sinh viên"}</small>
           </span>
-          {onLogout && <button type="button" className="logout-link" onClick={onLogout}>Đăng xuất</button>}
           <MoreHorizontal size={18} />
         </div>
       </div>
@@ -56,10 +55,11 @@ export function Sidebar({ page, go, user, onLogout }) {
   );
 }
 
-export function Topbar({ title, user, onLogout, isDark, onToggleTheme }) {
+export function Topbar({ title, user, onLogout, isDark, onToggleTheme, onSearch }) {
   const userName = user?.email ? user.email.split("@")[0].replace(/[._]/g, " ") : "Sinh viên";
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
   const unreadCount = useMemo(() => notifications.filter((item) => !item.read).length, [notifications]);
 
   useEffect(() => {
@@ -77,11 +77,26 @@ export function Topbar({ title, user, onLogout, isDark, onToggleTheme }) {
     }
   };
 
+  const handleSearch = (event) => {
+    event.preventDefault();
+    const query = searchValue.trim();
+    if (query) onSearch?.(query);
+  };
+
   return (
     <header className="topbar">
       <div className="crumb"><GraduationCap size={18} /><span>Đại học</span><span className="crumb-slash">/</span><b>{title}</b></div>
       <div className="top-actions">
-        <div className="search-box"><Search size={16} /><input aria-label="Tìm kiếm" placeholder="Tìm kiếm..." /><kbd>⌘ K</kbd></div>
+        <form className="search-box" role="search" onSubmit={handleSearch}>
+          <Search size={16} />
+          <input
+            aria-label="Tìm kiếm môn học"
+            value={searchValue}
+            onChange={(event) => setSearchValue(event.target.value)}
+            placeholder="Tìm môn học, giảng viên, phòng..."
+          />
+          <kbd>Enter</kbd>
+        </form>
         <div className="notification-wrap">
           <button className="icon-button" aria-label="Thông báo" onClick={handleOpen}>
             <Bell size={18} />
