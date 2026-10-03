@@ -4565,3 +4565,149 @@ td svg {
   background: #273449 !important;
   color: #e2e8f0 !important;
 }
+
+/* Admin panels: add breathing room around headings, filters, and scrollable tables. */
+.admin-content-panel {
+  min-width: 0;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.admin-content-panel .panel-head {
+  min-width: 0;
+  padding-bottom: 14px !important;
+}
+
+.admin-content-panel .panel-head > div:first-child {
+  min-width: 0;
+}
+
+.admin-content-panel .admin-table-scroll {
+  max-width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.admin-content-panel .admin-table-scroll table {
+  margin-top: 0 !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel {
+  background: #151e2e;
+  border-color: #344156;
+}
+
+:root[data-theme="dark"] .admin-content-panel .panel-head h2 {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel .panel-head p {
+  color: #bdc9da !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel .panel-head input {
+  background: #101827 !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel .panel-head input::placeholder {
+  color: #aab7ca !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel .admin-table-scroll {
+  border-color: #344156;
+  background: #151e2e;
+}
+
+:root[data-theme="dark"] .admin-logs-scroll td:nth-child(2) span {
+  color: #e5eaf3 !important;
+}
+
+/* The list-view day strip must use a dark surface in dark mode too. */
+:root[data-theme="dark"] .calendar-list-day-header {
+  background: #202c40;
+  border-bottom-color: #344156;
+}
+
+:root[data-theme="dark"] .calendar-list-day-card.today .calendar-list-day-header {
+  background: #3b3218;
+  border-bottom-color: #65531c;
+}
+
+:root[data-theme="dark"] .calendar-list-day-card.today {
+  background: #171e2b;
+  border-color: #c99a16;
+}
+
+:root[data-theme="dark"] .calendar-list-day-card.today .day-title-text {
+  color: #fde68a !important;
+}
+
+:root[data-theme="dark"] .calendar-list-day-header .day-title-text {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .calendar-list-day-header .day-course-count,
+:root[data-theme="dark"] .calendar-list-empty {
+  color: #bdc9da !important;
+}
+
+@media (max-width: 768px) {
+  .admin-content-panel {
+    padding: 14px 12px;
+    border-radius: 12px;
+  }
+
+  .admin-content-panel .panel-head {
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .admin-content-panel .panel-head > div:first-child,
+  .admin-content-panel .panel-head > div:nth-child(2) {
+    width: 100%;
+    max-width: none;
+    min-width: 0 !important;
+  }
+
+  .admin-content-panel .panel-head h2 {
+    font-size: 16px !important;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-content-panel .panel-head p {
+    font-size: 12px !important;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-content-panel .admin-table-scroll {
+    margin-top: 8px !important;
+  }
+
+  .admin-table-scroll table {
+    min-width: 780px;
+  }
+
+  .admin-logs-scroll table {
+    min-width: 620px;
+  }
+
+  .calendar-list-day-header {
+    gap: 8px;
+  }
+
+  .day-header-title {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .calendar-list-day-header .day-course-count {
+    flex: 0 0 auto;
+    max-width: 42%;
+    text-align: right;
+  }
+}
