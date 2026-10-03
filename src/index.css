@@ -5033,3 +5033,63 @@ body::before {
     margin: 10px auto 0;
   }
 }
+
+/* The sign-in panel is screen-sized; keep its glass layer genuinely see-through. */
+.auth-form-side {
+  background: rgba(255, 255, 255, .24) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
+.dark .auth-form-side,
+:root[data-theme="dark"] .auth-form-side {
+  background: rgba(15, 23, 42, .22) !important;
+  border-color: rgba(203, 213, 225, .30) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
+.password-input-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.auth-form .password-input-wrap input {
+  width: 100%;
+  padding-right: 46px !important;
+}
+
+.password-visibility-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #52627c;
+  cursor: pointer;
+}
+
+.password-visibility-toggle:hover {
+  background: rgba(100, 116, 139, .12);
+  color: #1d4ed8;
+}
+
+.dark .password-visibility-toggle,
+:root[data-theme="dark"] .password-visibility-toggle {
+  color: #cbd5e1;
+}
+
+.dark .password-visibility-toggle:hover,
+:root[data-theme="dark"] .password-visibility-toggle:hover {
+  background: rgba(203, 213, 225, .14);
+  color: #fff;
+}
