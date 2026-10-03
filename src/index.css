@@ -3937,12 +3937,44 @@ td svg {
   background: #f6f7fb;
 }
 
-.theme-toggle.is-light svg {
+/* Global Transition for Dark/Light Mode */
+html, body, .app-shell, .sidebar, .main-column, .topbar, .panel, .notification-panel, .calendar-nav-group, .calendar-view-toggles, .stat-card {
+  transition: background-color 0.2s ease, color 0.3s ease, border-color 0.3s ease !important;
+}
+
+/* Theme Toggle Button Animation (VitePress/Tailwind style) */
+.theme-toggle-inner {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle-inner svg {
+  position: absolute;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.theme-toggle.is-light .icon-sun {
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.5);
+}
+.theme-toggle.is-light .icon-moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
   color: #17233b;
   fill: #17233b;
 }
 
-.theme-toggle.is-dark svg {
+.theme-toggle.is-dark .icon-moon {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.5);
+}
+.theme-toggle.is-dark .icon-sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
   color: #f5b942;
   fill: #f5b942;
 }

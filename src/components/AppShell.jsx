@@ -109,7 +109,10 @@ export function Topbar({ title, user, onLogout, isDark, onToggleTheme }) {
           )}
         </div>
         <button type="button" className={`theme-toggle topbar-theme-toggle ${isDark ? "is-dark" : "is-light"}`} onClick={onToggleTheme} aria-label={isDark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"} title={isDark ? "Chuyển sang giao diện sáng" : "Chuyển sang giao diện tối"}>
-          {isDark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
+          <div className="theme-toggle-inner">
+            <Sun size={18} aria-hidden="true" className="icon-sun" />
+            <Moon size={18} aria-hidden="true" className="icon-moon" />
+          </div>
         </button>
         <span className="top-divider" />
         <button className="user-chip" type="button">
