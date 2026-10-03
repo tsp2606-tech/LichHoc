@@ -39,10 +39,28 @@ export function getCurrentUser() {
 
 export function setCurrentUser(user) {
   if (user) {
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    localStorage.setItem(USER_KEY, JSON.stringify(removeSensitiveFields(user)));
     return;
   }
   localStorage.removeItem(USER_KEY);
+}
+
+const sensitiveFieldPattern = /^(password|password_hash|hashed_password|passwd|pass)$/i;
+
+function removeSensitiveFields(value) {
+  if (Array.isArray(value)) {
+    return value.map(removeSensitiveFields);
+  }
+
+  if (!value || typeof value !== "object") {
+    return value;
+  }
+
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([key]) => !sensitiveFieldPattern.test(key))
+      .map(([key, nestedValue]) => [key, removeSensitiveFields(nestedValue)])
+  );
 }
 
 export function clearAuth() {
@@ -180,11 +198,13 @@ async function apiRequest(path, options = {}) {
   if (!response.ok) {
     const error = new Error(data.error || data.message || `Lỗi máy chủ phản hồi mã ${response.status}`);
     error.status = response.status;
-    error.data = data;
+    error.data = removeSensitiveFields(data);
+    error.retryAfter = response.headers.get("Retry-After");
+    error.queue = error.data.queue || error.data.waiting || null;
     throw error;
   }
 
-  return data;
+  return removeSensitiveFields(data);
 }
 
 export async function registerUser({ email, password, name = "", is_admin = false }) {

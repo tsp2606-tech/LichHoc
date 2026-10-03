@@ -16,10 +16,12 @@ export function AuthPage({ mode, go }) {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [queue, setQueue] = useState(null);
   const [errorDialog, setErrorDialog] = useState(null); // { title, message, code, type }
 
   useEffect(() => {
     setError("");
+    setQueue(null);
     setErrorDialog(null);
     setForm({ name: "", email: "", password: "", confirmPassword: "" });
   }, [register]);
@@ -32,6 +34,7 @@ export function AuthPage({ mode, go }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+    setQueue(null);
     setErrorDialog(null);
 
     const emailTrim = form.email.trim();
@@ -121,12 +124,21 @@ export function AuthPage({ mode, go }) {
       }
     } catch (err) {
       const errMsg = err.message || (register ? "Không thể hoàn tất đăng ký tài khoản." : "Email hoặc mật khẩu không chính xác.");
+      const isRateLimited = err.status === 429;
+      const queueData = err.queue || (isRateLimited ? err.data : null);
+      if (isRateLimited) {
+        setQueue({
+          position: queueData?.position ?? queueData?.queue_position ?? queueData?.current ?? null,
+          total: queueData?.total ?? queueData?.queue_total ?? queueData?.waiting ?? null,
+          retryAfter: err.retryAfter || queueData?.retry_after || null,
+        });
+      }
       setError(errMsg);
       setErrorDialog({
-        title: register ? "Đăng ký không thành công" : "Đăng nhập không thành công",
-        message: errMsg,
-        code: err.status ? `HTTP_${err.status}` : "AUTH_FAILED",
-        type: "error",
+        title: isRateLimited ? "Hệ thống đang quá tải" : register ? "Đăng ký không thành công" : "Đăng nhập không thành công",
+        message: isRateLimited ? "Bạn đang ở trong hàng đợi. Vui lòng chờ rồi thử lại." : errMsg,
+        code: isRateLimited ? "TOO_MANY_REQUESTS" : err.status ? `HTTP_${err.status}` : "AUTH_FAILED",
+        type: isRateLimited ? "warning" : "error",
       });
     } finally {
       setLoading(false);
@@ -177,6 +189,15 @@ export function AuthPage({ mode, go }) {
           </p>
 
           {error && <div className="error-banner">{error}</div>}
+
+          {queue && (
+            <div className="error-banner" role="status" style={{ marginTop: "10px" }}>
+              {queue.position !== null && queue.total !== null
+                ? `Hàng đợi: ${queue.position}/${queue.total} người dùng`
+                : "Hệ thống đang xử lý quá nhiều yêu cầu. Bạn đã được ghi nhận trong hàng đợi."}
+              {queue.retryAfter ? ` Vui lòng thử lại sau ${queue.retryAfter} giây.` : ""}
+            </div>
+          )}
 
           <div style={{ marginTop: "18px", marginBottom: "16px" }}>
             <GoogleLoginButton
