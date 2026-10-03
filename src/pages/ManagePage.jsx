@@ -8,10 +8,7 @@ import { ErrorDialog } from "../components/ErrorDialog";
 
 export function ManagePage() {
   const [courses, setCourses] = useState(classes);
-  const [searchQuery, setSearchQuery] = useState(() => {
-    const params = new URLSearchParams(location.hash.split("?")[1] || "");
-    return params.get("search") || "";
-  });
+  const [searchQuery, setSearchQuery] = useState("");
   const [editingCourse, setEditingCourse] = useState(null);
   const [draft, setDraft] = useState({ name: "", room: "", teacher: "", time: "", day: "" });
   const [notice, setNotice] = useState("");
@@ -36,12 +33,6 @@ export function ManagePage() {
 
   useEffect(() => {
     loadCourses();
-  }, []);
-
-  useEffect(() => {
-    const handleGlobalSearch = (event) => setSearchQuery(event.detail?.query || "");
-    window.addEventListener("lichhoc:globalSearch", handleGlobalSearch);
-    return () => window.removeEventListener("lichhoc:globalSearch", handleGlobalSearch);
   }, []);
 
   const filteredCourses = courses.filter((course) => {

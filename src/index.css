@@ -5220,3 +5220,97 @@ body::before {
 .dark .nav-link {
   color: #e2e8f0;
 }
+
+/* Stronger readable text over both wallpaper themes. */
+:root[data-theme="light"] .topbar .crumb,
+:root[data-theme="light"] .topbar .crumb span,
+:root[data-theme="light"] .topbar .crumb svg,
+:root[data-theme="light"] .sidebar .nav-link,
+:root[data-theme="light"] .profile-mini,
+:root[data-theme="light"] .brand b,
+:root[data-theme="light"] .semester-card b,
+:root[data-theme="light"] .stat-label,
+:root[data-theme="light"] .stat-value,
+:root[data-theme="light"] .table-panel td,
+:root[data-theme="light"] .table-footer,
+:root[data-theme="light"] .field > span {
+  color: #1e293b !important;
+}
+
+:root[data-theme="light"] .topbar .crumb b,
+:root[data-theme="light"] .sidebar .nav-link.active {
+  color: #1d4ed8 !important;
+}
+
+:root[data-theme="light"] .brand small,
+:root[data-theme="light"] .side-label,
+:root[data-theme="light"] .profile-mini small,
+:root[data-theme="light"] .semester-card > span,
+:root[data-theme="light"] .semester-card small,
+:root[data-theme="light"] .stat-note,
+:root[data-theme="light"] .page-heading .eyebrow,
+:root[data-theme="light"] .page-heading p,
+:root[data-theme="light"] .panel p,
+:root[data-theme="light"] .table-panel th,
+:root[data-theme="light"] .course-cell small {
+  color: #475569 !important;
+}
+
+:root[data-theme="dark"] .topbar .crumb,
+.dark .topbar .crumb,
+:root[data-theme="dark"] .topbar .crumb span,
+.dark .topbar .crumb span,
+:root[data-theme="dark"] .topbar .crumb svg,
+.dark .topbar .crumb svg,
+:root[data-theme="dark"] .sidebar .nav-link,
+.dark .sidebar .nav-link,
+:root[data-theme="dark"] .profile-mini,
+.dark .profile-mini,
+:root[data-theme="dark"] .brand b,
+.dark .brand b,
+:root[data-theme="dark"] .semester-card b,
+.dark .semester-card b,
+:root[data-theme="dark"] .stat-label,
+.dark .stat-label,
+:root[data-theme="dark"] .stat-value,
+.dark .stat-value,
+:root[data-theme="dark"] .table-panel td,
+.dark .table-panel td,
+:root[data-theme="dark"] .table-footer,
+.dark .table-footer,
+:root[data-theme="dark"] .field > span,
+.dark .field > span {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .topbar .crumb b,
+.dark .topbar .crumb b,
+:root[data-theme="dark"] .sidebar .nav-link.active,
+.dark .sidebar .nav-link.active {
+  color: #bfccff !important;
+}
+
+:root[data-theme="dark"] .brand small,
+.dark .brand small,
+:root[data-theme="dark"] .side-label,
+.dark .side-label,
+:root[data-theme="dark"] .profile-mini small,
+.dark .profile-mini small,
+:root[data-theme="dark"] .semester-card > span,
+.dark .semester-card > span,
+:root[data-theme="dark"] .semester-card small,
+.dark .semester-card small,
+:root[data-theme="dark"] .stat-note,
+.dark .stat-note,
+:root[data-theme="dark"] .page-heading .eyebrow,
+.dark .page-heading .eyebrow,
+:root[data-theme="dark"] .page-heading p,
+.dark .page-heading p,
+:root[data-theme="dark"] .panel p,
+.dark .panel p,
+:root[data-theme="dark"] .table-panel th,
+.dark .table-panel th,
+:root[data-theme="dark"] .course-cell small,
+.dark .course-cell small {
+  color: #cbd5e1 !important;
+}

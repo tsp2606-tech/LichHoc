@@ -1,4 +1,4 @@
-import { CalendarDays, ChevronDown, CircleHelp, Database, GraduationCap, Link2, Search, ShieldCheck, Bell, LogOut, MoreHorizontal, Moon, Sun } from "lucide-react";
+import { CalendarDays, ChevronDown, CircleHelp, Database, GraduationCap, Link2, ShieldCheck, Bell, LogOut, MoreHorizontal, Moon, Sun } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { getNotifications, getUnreadNotificationsCount, markAllNotificationsRead } from "../lib/notifications";
 
@@ -55,11 +55,10 @@ export function Sidebar({ page, go, user }) {
   );
 }
 
-export function Topbar({ title, user, onLogout, isDark, onToggleTheme, onSearch }) {
+export function Topbar({ title, user, onLogout, isDark, onToggleTheme }) {
   const userName = user?.email ? user.email.split("@")[0].replace(/[._]/g, " ") : "Sinh viên";
   const [notifications, setNotifications] = useState([]);
   const [open, setOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
   const unreadCount = useMemo(() => notifications.filter((item) => !item.read).length, [notifications]);
 
   useEffect(() => {
@@ -77,26 +76,10 @@ export function Topbar({ title, user, onLogout, isDark, onToggleTheme, onSearch 
     }
   };
 
-  const handleSearch = (event) => {
-    event.preventDefault();
-    const query = searchValue.trim();
-    if (query) onSearch?.(query);
-  };
-
   return (
     <header className="topbar">
       <div className="crumb"><GraduationCap size={18} /><span>Đại học</span><span className="crumb-slash">/</span><b>{title}</b></div>
       <div className="top-actions">
-        <form className="search-box" role="search" onSubmit={handleSearch}>
-          <Search size={16} />
-          <input
-            aria-label="Tìm kiếm môn học"
-            value={searchValue}
-            onChange={(event) => setSearchValue(event.target.value)}
-            placeholder="Tìm môn học, giảng viên, phòng..."
-          />
-          <kbd>Enter</kbd>
-        </form>
         <div className="notification-wrap">
           <button className="icon-button" aria-label="Thông báo" onClick={handleOpen}>
             <Bell size={18} />
