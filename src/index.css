@@ -3939,7 +3939,7 @@ td svg {
 
 /* Global Transition for Dark/Light Mode */
 html, body, .app-shell, .sidebar, .main-column, .topbar, .panel, .notification-panel, .calendar-nav-group, .calendar-view-toggles, .stat-card {
-  transition: background-color 0.2s ease, color 0.3s ease, border-color 0.3s ease !important;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease !important;
 }
 
 /* Theme Toggle Button Animation (VitePress/Tailwind style) */
@@ -3954,7 +3954,7 @@ html, body, .app-shell, .sidebar, .main-column, .topbar, .panel, .notification-p
 
 .theme-toggle-inner svg {
   position: absolute;
-  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
 }
 
 .theme-toggle.is-light .icon-sun {
