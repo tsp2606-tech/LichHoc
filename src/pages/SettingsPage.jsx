@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Users, CalendarDays, Bell, Link2, GraduationCap, CheckCircle2, AlertCircle } from "lucide-react";
+import { GraduationCap, CheckCircle2, AlertCircle } from "lucide-react";
 import { PageHeading, Badge } from "../components/AppShell";
 import { getCurrentUser, setCurrentUser, updateUserProfile, getUserProfile } from "../lib/api";
 import { getNotifications } from "../lib/notifications";
@@ -147,14 +147,7 @@ export function SettingsPage() {
   return (
     <>
       <PageHeading eyebrow="TÙY CHỈNH KHÔNG GIAN" title="Cài đặt & kết nối" detail="Quản lý tài khoản, tùy chọn lịch và các kết nối của bạn." />
-      <div className="settings-layout">
-        <nav className="settings-nav">
-          <a className="chosen"><Users size={17} />Tài khoản</a>
-          <a><CalendarDays size={17} />Tùy chọn lịch</a>
-          <a><Bell size={17} />Thông báo</a>
-          <a><Link2 size={17} />Kết nối</a>
-        </nav>
-
+      <div className="settings-layout settings-layout-full">
         <div className="settings-content">
           <section className="panel settings-panel">
             <div className="settings-title" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>

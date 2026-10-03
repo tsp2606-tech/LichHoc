@@ -2000,6 +2000,21 @@ td svg {
   gap: 15px
 }
 
+.settings-layout-full {
+  display: block;
+  width: 100%;
+}
+
+.settings-layout-full .settings-content {
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.settings-layout-full .settings-panel {
+  width: 100%;
+  min-width: 0;
+}
+
 .settings-panel {
   padding: 18px
 }
