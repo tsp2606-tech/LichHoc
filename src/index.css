@@ -4736,7 +4736,7 @@ body::before {
   z-index: -1;
   pointer-events: none;
   background-image:
-    linear-gradient(135deg, rgba(12, 20, 40, .30), rgba(21, 19, 43, .20)),
+    linear-gradient(135deg, rgba(12, 20, 40, .12), rgba(21, 19, 43, .08)),
     var(--lichhoc-artwork);
   background-size: cover;
   background-position: center;
@@ -4815,8 +4815,23 @@ body::before {
 :root[data-theme="dark"] .landing-schedule,
 :root[data-theme="dark"] .auth-form-side,
 :root[data-theme="dark"] .extension-auth-card {
-  background-color: rgba(15, 23, 42, .78) !important;
+  background-color: rgba(15, 23, 42, .62) !important;
   border-color: rgba(148, 163, 184, .26) !important;
+}
+
+/* The sign-in column spans most of the screen, so keep this surface much clearer. */
+.dark .auth-form-side,
+:root[data-theme="dark"] .auth-form-side {
+  background: rgba(15, 23, 42, .30) !important;
+  border-color: rgba(203, 213, 225, .28) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+.auth-form-side {
+  background: rgba(255, 255, 255, .42) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
 }
 
 /* Keep the login form legible over the more transparent surface. */
