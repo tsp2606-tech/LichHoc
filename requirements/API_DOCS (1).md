@@ -82,6 +82,25 @@ Tài liệu này cung cấp đầy đủ thông tin kỹ thuật về **tất c�
 }
 ```
 
+### 2.2.1. Quy tắc bảo mật bắt buộc cho API
+
+- Không trả về `password`, `password_hash`, `hashed_password` hoặc bất kỳ biến thể nào trong mọi response (`register`, `login`, `me`, admin users, refresh token và lỗi). Chỉ lưu mật khẩu dưới dạng hash bằng Argon2id hoặc bcrypt; tuyệt đối không tự hash bằng SHA-256/MD5.
+- Giới hạn tốc độ ở backend theo IP và tài khoản/email đã chuẩn hóa. Khi vượt giới hạn, trả `429 Too Many Requests`, header `Retry-After` (giây), và không tiết lộ email có tồn tại hay không.
+- Khi hệ thống quá tải, đưa request vào hàng đợi dùng chung có giới hạn. Response `429` có thể gồm metadata không nhạy cảm:
+
+```json
+{
+  "error": "Hệ thống đang quá tải, vui lòng chờ",
+  "queue": {
+    "position": 12,
+    "total": 48,
+    "retry_after": 10
+  }
+}
+```
+
+- `position` và `total` phải là số nguyên không âm; không đưa password, token, email hoặc thông tin định danh người dùng khác vào metadata hàng đợi. Rate limit và queue phải được thực hiện ở API service, không chỉ ở frontend.
+
 ---
 
 ## 📅 3. Nhóm API Bóc Tách & Quản Lý Lịch Học (Schedule API)
