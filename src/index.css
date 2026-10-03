@@ -4717,6 +4717,11 @@ td svg {
   --lichhoc-artwork: url("https://i.pinimg.com/600x/5b/b6/7e/5bb67e34dfb19f862c90556990dfd127.jpg");
 }
 
+:root[data-theme="dark"],
+.dark {
+  --lichhoc-artwork: url("https://i.pinimg.com/600x/4d/b2/e2/4db2e2e9e0d5af8e3a368d753acc3bdb.jpg");
+}
+
 html,
 body,
 #root {
@@ -4741,6 +4746,13 @@ body::before {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+}
+
+:root[data-theme="dark"] body::before,
+.dark body::before {
+  background-image:
+    linear-gradient(135deg, rgba(7, 13, 28, .12), rgba(10, 20, 34, .08)),
+    var(--lichhoc-artwork);
 }
 
 /* Let the common image show through the app's page-sized containers. */
