@@ -349,7 +349,7 @@ export function AdminPage() {
       </div>
 
       {/* 1. Phần Quản lý Người dùng & Tra cứu */}
-      <section className="panel" style={{ marginBottom: "12px" }}>
+      <section className="panel admin-content-panel admin-users-panel" style={{ marginBottom: "12px" }}>
         <div className="panel-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px", paddingBottom: "8px" }}>
           <div>
             <h2 style={{ fontSize: "17px", fontWeight: "700", color: "#0f172a", margin: 0 }}>
@@ -599,7 +599,7 @@ export function AdminPage() {
       </section>
 
       {/* 2. Phần Xem Logs của những thành viên khác */}
-      <section className="panel">
+      <section className="panel admin-content-panel admin-logs-panel">
         <div className="panel-head" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
           <div>
             <h2 style={{ fontSize: "17px", fontWeight: "700", color: "#0f172a", margin: 0 }}>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CalendarDays, ArrowUpRight } from "lucide-react";
+import { CalendarDays, ArrowUpRight, Eye, EyeOff } from "lucide-react";
 import { Brand, Badge, Button } from "../components/AppShell";
 import { loginUser, registerUser } from "../lib/api";
 import { ErrorDialog } from "../components/ErrorDialog";
@@ -14,6 +14,7 @@ export function AuthPage({ mode, go }) {
     confirmPassword: "",
   });
   const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [queue, setQueue] = useState(null);
@@ -257,13 +258,35 @@ export function AuthPage({ mode, go }) {
 
           <label className="field">
             <span>Mật khẩu</span>
-            <input type="password" name="password" value={form.password} onChange={handleChange} placeholder="Nhập mật khẩu" />
+            <span className="password-input-wrap">
+              <input type={showPassword ? "text" : "password"} name="password" value={form.password} onChange={handleChange} placeholder="Nhập mật khẩu" />
+              <button
+                className="password-visibility-toggle"
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                aria-pressed={showPassword}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </span>
           </label>
 
           {register && (
             <label className="field">
               <span>Nhập lại mật khẩu</span>
-              <input type="password" name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="Nhập lại mật khẩu" />
+              <span className="password-input-wrap">
+                <input type={showPassword ? "text" : "password"} name="confirmPassword" value={form.confirmPassword} onChange={handleChange} placeholder="Nhập lại mật khẩu" />
+                <button
+                  className="password-visibility-toggle"
+                  type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  aria-pressed={showPassword}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </span>
             </label>
           )}
 

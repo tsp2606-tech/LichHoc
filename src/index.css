@@ -4511,3 +4511,585 @@ td svg {
   color: #ffffff !important;
   box-shadow: none !important;
 }
+
+/* Keep page and table text readable against both theme backgrounds. */
+:root[data-theme="light"] .page-heading h1,
+:root[data-theme="light"] .panel-head h2,
+:root[data-theme="light"] .stat-card .stat-value,
+:root[data-theme="light"] .course-cell b {
+  color: #1e293b;
+}
+
+:root[data-theme="light"] .page-heading p,
+:root[data-theme="light"] .stat-card .stat-label,
+:root[data-theme="light"] .stat-card .stat-note,
+:root[data-theme="light"] .course-cell small,
+:root[data-theme="light"] .table-panel th,
+:root[data-theme="light"] .table-panel td,
+:root[data-theme="light"] .row-actions button,
+:root[data-theme="light"] .table-footer {
+  color: #475569;
+}
+
+:root[data-theme="light"] .code-pill {
+  color: #334155;
+}
+
+:root[data-theme="light"] .table-panel thead {
+  background: #f1f5f9;
+}
+
+:root[data-theme="dark"] .page-heading h1,
+:root[data-theme="dark"] .panel-head h2,
+:root[data-theme="dark"] .stat-card .stat-value,
+:root[data-theme="dark"] .course-cell b {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .page-heading p,
+:root[data-theme="dark"] .stat-card .stat-label,
+:root[data-theme="dark"] .stat-card .stat-note,
+:root[data-theme="dark"] .course-cell small,
+:root[data-theme="dark"] .table-panel th,
+:root[data-theme="dark"] .table-panel td,
+:root[data-theme="dark"] .row-actions button,
+:root[data-theme="dark"] .table-footer {
+  color: #bdc9da !important;
+}
+
+:root[data-theme="dark"] .table-panel thead {
+  background: #202c40 !important;
+}
+
+:root[data-theme="dark"] .code-pill {
+  background: #273449 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Admin panels: add breathing room around headings, filters, and scrollable tables. */
+.admin-content-panel {
+  min-width: 0;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.admin-content-panel .panel-head {
+  min-width: 0;
+  padding-bottom: 14px !important;
+}
+
+.admin-content-panel .panel-head > div:first-child {
+  min-width: 0;
+}
+
+.admin-content-panel .admin-table-scroll {
+  max-width: 100%;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.admin-content-panel .admin-table-scroll table {
+  margin-top: 0 !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel {
+  background: #151e2e;
+  border-color: #344156;
+}
+
+:root[data-theme="dark"] .admin-content-panel .panel-head h2 {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel .panel-head p {
+  color: #bdc9da !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel .panel-head input {
+  background: #101827 !important;
+  border-color: #475569 !important;
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel .panel-head input::placeholder {
+  color: #aab7ca !important;
+}
+
+:root[data-theme="dark"] .admin-content-panel .admin-table-scroll {
+  border-color: #344156;
+  background: #151e2e;
+}
+
+:root[data-theme="dark"] .admin-logs-scroll td:nth-child(2) span {
+  color: #e5eaf3 !important;
+}
+
+/* The list-view day strip must use a dark surface in dark mode too. */
+:root[data-theme="dark"] .calendar-list-day-header {
+  background: #202c40;
+  border-bottom-color: #344156;
+}
+
+:root[data-theme="dark"] .calendar-list-day-card.today .calendar-list-day-header {
+  background: #3b3218;
+  border-bottom-color: #65531c;
+}
+
+:root[data-theme="dark"] .calendar-list-day-card.today {
+  background: #171e2b;
+  border-color: #c99a16;
+}
+
+:root[data-theme="dark"] .calendar-list-day-card.today .day-title-text {
+  color: #fde68a !important;
+}
+
+:root[data-theme="dark"] .calendar-list-day-header .day-title-text {
+  color: #f1f5f9 !important;
+}
+
+:root[data-theme="dark"] .calendar-list-day-header .day-course-count,
+:root[data-theme="dark"] .calendar-list-empty {
+  color: #bdc9da !important;
+}
+
+@media (max-width: 768px) {
+  .admin-content-panel {
+    padding: 14px 12px;
+    border-radius: 12px;
+  }
+
+  .admin-content-panel .panel-head {
+    align-items: stretch !important;
+    gap: 10px !important;
+  }
+
+  .admin-content-panel .panel-head > div:first-child,
+  .admin-content-panel .panel-head > div:nth-child(2) {
+    width: 100%;
+    max-width: none;
+    min-width: 0 !important;
+  }
+
+  .admin-content-panel .panel-head h2 {
+    font-size: 16px !important;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-content-panel .panel-head p {
+    font-size: 12px !important;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-content-panel .admin-table-scroll {
+    margin-top: 8px !important;
+  }
+
+  .admin-table-scroll table {
+    min-width: 780px;
+  }
+
+  .admin-logs-scroll table {
+    min-width: 620px;
+  }
+
+  .calendar-list-day-header {
+    gap: 8px;
+  }
+
+  .day-header-title {
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .calendar-list-day-header .day-course-count {
+    flex: 0 0 auto;
+    max-width: 42%;
+    text-align: right;
+  }
+}
+
+/* Use the supplied artwork as the shared backdrop across every app route. */
+:root {
+  --lichhoc-artwork: url("https://i.pinimg.com/originals/5b/b6/7e/5bb67e34dfb19f862c90556990dfd127.jpg");
+}
+
+:root[data-theme="dark"],
+.dark {
+  --lichhoc-artwork: url("https://i.pinimg.com/1200x/4d/b2/e2/4db2e2e9e0d5af8e3a368d753acc3bdb.jpg");
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(135deg, rgba(12, 20, 40, .12), rgba(21, 19, 43, .08)),
+    var(--lichhoc-artwork);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+:root[data-theme="dark"] body::before,
+.dark body::before {
+  background-image:
+    linear-gradient(135deg, rgba(7, 13, 28, .12), rgba(10, 20, 34, .08)),
+    var(--lichhoc-artwork);
+}
+
+/* Let the common image show through the app's page-sized containers. */
+.app-shell,
+.main-column,
+.page-content,
+.landing,
+.auth-layout,
+.extension-auth-layout,
+.dark .app-shell,
+.dark .main-column,
+.dark .page-content,
+.dark .landing,
+.dark .auth-layout,
+.dark .extension-auth-layout,
+:root[data-theme="dark"] .app-shell,
+:root[data-theme="dark"] .main-column,
+:root[data-theme="dark"] .page-content,
+:root[data-theme="dark"] .landing,
+:root[data-theme="dark"] .auth-layout,
+:root[data-theme="dark"] .extension-auth-layout {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+/* Give navigation and content panels a readable glass surface. */
+.sidebar,
+.topbar,
+.notification-panel,
+.panel,
+.stat-card,
+.calendar-panel,
+.table-panel,
+.chart-panel,
+.service-panel,
+.settings-panel,
+.semester-card,
+.landing-schedule,
+.auth-form-side,
+.extension-auth-card {
+  background-color: rgba(255, 255, 255, .76) !important;
+  border-color: rgba(148, 163, 184, .34) !important;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.dark .sidebar,
+.dark .topbar,
+.dark .notification-panel,
+.dark .panel,
+.dark .stat-card,
+.dark .calendar-panel,
+.dark .table-panel,
+.dark .chart-panel,
+.dark .service-panel,
+.dark .settings-panel,
+.dark .semester-card,
+.dark .landing-schedule,
+.dark .auth-form-side,
+.dark .extension-auth-card,
+:root[data-theme="dark"] .sidebar,
+:root[data-theme="dark"] .topbar,
+:root[data-theme="dark"] .notification-panel,
+:root[data-theme="dark"] .panel,
+:root[data-theme="dark"] .stat-card,
+:root[data-theme="dark"] .calendar-panel,
+:root[data-theme="dark"] .table-panel,
+:root[data-theme="dark"] .chart-panel,
+:root[data-theme="dark"] .service-panel,
+:root[data-theme="dark"] .settings-panel,
+:root[data-theme="dark"] .semester-card,
+:root[data-theme="dark"] .landing-schedule,
+:root[data-theme="dark"] .auth-form-side,
+:root[data-theme="dark"] .extension-auth-card {
+  background-color: rgba(15, 23, 42, .62) !important;
+  border-color: rgba(148, 163, 184, .26) !important;
+}
+
+/* The sign-in column spans most of the screen, so keep this surface much clearer. */
+.dark .auth-form-side,
+:root[data-theme="dark"] .auth-form-side {
+  background: rgba(15, 23, 42, .30) !important;
+  border-color: rgba(203, 213, 225, .28) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+.auth-form-side {
+  background: rgba(255, 255, 255, .42) !important;
+  backdrop-filter: blur(5px) !important;
+  -webkit-backdrop-filter: blur(5px) !important;
+}
+
+/* Keep the login form legible over the more transparent surface. */
+.auth-form-side .auth-form h2,
+.auth-form-side .auth-form h1 {
+  color: #172554 !important;
+}
+
+.auth-form-side .auth-form > p,
+.auth-form-side .auth-form label,
+.auth-form-side .back-home {
+  color: #334155 !important;
+}
+
+.auth-form-side .auth-form input {
+  color: #172033 !important;
+  background: rgba(255, 255, 255, .76) !important;
+  border-color: rgba(100, 116, 139, .38) !important;
+}
+
+.dark .auth-form-side .auth-form h2,
+.dark .auth-form-side .auth-form h1,
+:root[data-theme="dark"] .auth-form-side .auth-form h2,
+:root[data-theme="dark"] .auth-form-side .auth-form h1 {
+  color: #f8fafc !important;
+}
+
+.dark .auth-form-side .auth-form > p,
+.dark .auth-form-side .auth-form label,
+.dark .auth-form-side .back-home,
+:root[data-theme="dark"] .auth-form-side .auth-form > p,
+:root[data-theme="dark"] .auth-form-side .auth-form label,
+:root[data-theme="dark"] .auth-form-side .back-home {
+  color: #dbe5f4 !important;
+}
+
+.dark .auth-form-side .auth-form input,
+:root[data-theme="dark"] .auth-form-side .auth-form input {
+  color: #f8fafc !important;
+  background: rgba(15, 23, 42, .62) !important;
+  border-color: rgba(203, 213, 225, .34) !important;
+}
+
+.dark .auth-form-side .auth-form input::placeholder,
+:root[data-theme="dark"] .auth-form-side .auth-form input::placeholder {
+  color: #b6c2d3 !important;
+}
+
+/* Pinterest-inspired login backdrop: keep the supplied artwork behind the form. */
+.auth-layout {
+  position: relative;
+  isolation: isolate;
+  background-image:
+    linear-gradient(90deg, rgba(31, 13, 62, .62) 0%, rgba(38, 20, 66, .34) 48%, rgba(20, 23, 40, .25) 100%),
+    url("https://i.pinimg.com/originals/5b/b6/7e/5bb67e34dfb19f862c90556990dfd127.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.dark .auth-layout {
+  background-image:
+    linear-gradient(90deg, rgba(20, 12, 42, .70) 0%, rgba(24, 18, 48, .52) 48%, rgba(9, 15, 30, .5) 100%),
+    url("https://i.pinimg.com/originals/5b/b6/7e/5bb67e34dfb19f862c90556990dfd127.jpg") !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  background-attachment: fixed !important;
+}
+
+.auth-art,
+.dark .auth-art,
+:root[data-theme="dark"] .auth-art {
+  min-width: 0;
+  padding: 34px clamp(26px, 6vw, 88px);
+  background: transparent !important;
+}
+
+.auth-art:after {
+  display: none;
+}
+
+.auth-art .brand {
+  padding: 0;
+}
+
+.auth-art .brand b,
+.auth-art .brand small {
+  color: #fff !important;
+  text-shadow: 0 1px 10px rgba(23, 10, 47, .45);
+}
+
+.auth-art .brand-mark {
+  background: rgba(255, 255, 255, .2);
+  border: 1px solid rgba(255, 255, 255, .42);
+  backdrop-filter: blur(8px);
+}
+
+.auth-art .auth-message h1 {
+  color: #fff !important;
+  text-shadow: 0 2px 24px rgba(21, 8, 43, .48);
+}
+
+.auth-art .auth-message h1 em {
+  color: #ffd4ed !important;
+}
+
+.auth-art .auth-message > p,
+.auth-art .auth-copyright {
+  color: #fff !important;
+  text-shadow: 0 1px 12px rgba(21, 8, 43, .62);
+}
+
+.auth-art .badge.blue {
+  background: rgba(255, 255, 255, .18);
+  border: 1px solid rgba(255, 255, 255, .35);
+  color: #fff;
+  backdrop-filter: blur(8px);
+}
+
+.auth-preview {
+  background: rgba(255, 255, 255, .92);
+  backdrop-filter: blur(12px);
+}
+
+.auth-form-side {
+  align-self: center;
+  min-width: 0;
+  min-height: calc(100vh - 48px);
+  margin: 24px;
+  padding: 30px clamp(22px, 4vw, 52px);
+  border: 1px solid rgba(255, 255, 255, .65);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 24px 80px rgba(16, 12, 38, .24);
+  backdrop-filter: blur(18px);
+}
+
+.dark .auth-form-side,
+:root[data-theme="dark"] .auth-form-side {
+  background: rgba(15, 23, 42, .91) !important;
+  border-color: rgba(203, 213, 225, .2) !important;
+  box-shadow: 0 24px 80px rgba(4, 7, 18, .44);
+  backdrop-filter: blur(18px);
+}
+
+@media (max-width: 768px) {
+  .auth-layout,
+  .dark .auth-layout {
+    min-height: 100vh;
+    background-attachment: scroll !important;
+    background-position: center top !important;
+  }
+
+  .auth-art,
+  .dark .auth-art,
+  :root[data-theme="dark"] .auth-art {
+    min-height: 300px;
+    padding: 24px 22px 12px;
+  }
+
+  .auth-message {
+    margin: 36px 0 18px;
+  }
+
+  .auth-message h1 {
+    max-width: 480px;
+    font-size: clamp(27px, 7vw, 34px);
+  }
+
+  .auth-message > p {
+    max-width: 420px;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .auth-form-side {
+    align-self: stretch;
+    min-height: 0;
+    margin: 0 14px 20px;
+    padding: 20px 18px 24px;
+    border-radius: 20px;
+  }
+
+  .auth-form {
+    margin: 10px auto 0;
+  }
+}
+
+/* The sign-in panel is screen-sized; keep its glass layer genuinely see-through. */
+.auth-form-side {
+  background: rgba(255, 255, 255, .24) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
+.dark .auth-form-side,
+:root[data-theme="dark"] .auth-form-side {
+  background: rgba(15, 23, 42, .22) !important;
+  border-color: rgba(203, 213, 225, .30) !important;
+  backdrop-filter: blur(3px) !important;
+  -webkit-backdrop-filter: blur(3px) !important;
+}
+
+.password-input-wrap {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.auth-form .password-input-wrap input {
+  width: 100%;
+  padding-right: 46px !important;
+}
+
+.password-visibility-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #52627c;
+  cursor: pointer;
+}
+
+.password-visibility-toggle:hover {
+  background: rgba(100, 116, 139, .12);
+  color: #1d4ed8;
+}
+
+.dark .password-visibility-toggle,
+:root[data-theme="dark"] .password-visibility-toggle {
+  color: #cbd5e1;
+}
+
+.dark .password-visibility-toggle:hover,
+:root[data-theme="dark"] .password-visibility-toggle:hover {
+  background: rgba(203, 213, 225, .14);
+  color: #fff;
+}
