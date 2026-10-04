@@ -341,6 +341,7 @@ export function CalendarPage() {
       // 3. Cập nhật cache và giao diện
       localStorage.setItem("lichhoc_schedule_cache", JSON.stringify(schedule));
       setApiCourses(schedule.map((event, index) => formatCourseFromEvent(event, index)));
+      window.dispatchEvent(new CustomEvent("lichhoc:scheduleUpdated"));
     } catch {
       // Nếu API lỗi/timeout và chưa có cache thì clear lưới lịch
       if (!localStorage.getItem("lichhoc_schedule_cache")) {
@@ -376,6 +377,7 @@ export function CalendarPage() {
       
       // Cập nhật cache mới khi đồng bộ thủ công
       localStorage.setItem("lichhoc_schedule_cache", JSON.stringify(schedule));
+      window.dispatchEvent(new CustomEvent("lichhoc:scheduleUpdated"));
       
       const formatted = schedule.map((event, index) => formatCourseFromEvent(event, index));
       setApiCourses(formatted);

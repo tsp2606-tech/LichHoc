@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { CalendarDays, GraduationCap, CheckCircle2, AlertCircle, ImagePlus, RotateCcw } from "lucide-react";
+import { CalendarDays, GraduationCap, CheckCircle2, AlertCircle, ImagePlus, RotateCcw, BellRing } from "lucide-react";
 import { PageHeading, Badge } from "../components/AppShell";
 import { getCurrentUser, setCurrentUser, updateUserProfile, getUserProfile } from "../lib/api";
 import { getNotifications } from "../lib/notifications";
 import { ErrorDialog } from "../components/ErrorDialog";
 import { applyBackgroundPreference, getSavedBackground, resetBackgroundPreference, saveBackgroundPreference } from "../lib/backgroundPreference";
+import { getClassReminderPreferences, saveClassReminderPreferences } from "../lib/classReminders";
 
 function compressBackgroundImage(file) {
   return new Promise((resolve, reject) => {
@@ -55,6 +56,37 @@ export function SettingsPage() {
   const [customBackground, setCustomBackground] = useState(() => getSavedBackground(currentUser));
   const [backgroundMessage, setBackgroundMessage] = useState("");
   const [savingBackground, setSavingBackground] = useState(false);
+  const [classReminderPreferences, setClassReminderPreferences] = useState(() => getClassReminderPreferences(currentUser));
+  const [reminderMessage, setReminderMessage] = useState("");
+
+  const handleToggleClassReminder = async () => {
+    const enabled = !classReminderPreferences.enabled;
+    let permissionText = "";
+    if (enabled && "Notification" in window && Notification.permission === "default") {
+      try {
+        const permission = await Notification.requestPermission();
+        permissionText = permission === "granted"
+          ? " Đã bật thông báo trên trình duyệt."
+          : " Trình duyệt chưa cho phép thông báo; nhắc giờ vẫn hiện trong trang web khi bạn đang mở trang.";
+      } catch {
+        permissionText = " Nhắc giờ trong trang web vẫn hoạt động khi bạn đang mở trang.";
+      }
+    } else if (enabled && "Notification" in window && Notification.permission === "granted") {
+      permissionText = " Đã bật thông báo trên trình duyệt.";
+    } else if (enabled) {
+      permissionText = " Nhắc giờ sẽ hiện trong trang web khi bạn đang mở trang.";
+    }
+
+    const next = saveClassReminderPreferences({ ...classReminderPreferences, enabled }, currentUser);
+    setClassReminderPreferences(next);
+    setReminderMessage(enabled ? `Đã bật nhắc giờ vào lớp.${permissionText}` : "Đã tắt nhắc giờ vào lớp.");
+  };
+
+  const handleReminderLeadChange = (event) => {
+    const next = saveClassReminderPreferences({ ...classReminderPreferences, minutesBefore: Number(event.target.value) }, currentUser);
+    setClassReminderPreferences(next);
+    setReminderMessage(`Sẽ nhắc trước ${next.minutesBefore} phút.`);
+  };
 
 
   // Đồng bộ thông tin mới nhất từ BE khi vào trang
@@ -393,6 +425,29 @@ export function SettingsPage() {
             </div>
 
             <div className="notification-settings-list">
+              <div className="class-reminder-settings">
+                <div className="class-reminder-settings-copy">
+                  <span className="class-reminder-settings-icon"><BellRing size={17} /></span>
+                  <div>
+                    <strong>Nhắc giờ vào lớp</strong>
+                    <p>Báo trước giờ học, kèm phòng và liên kết mở bản đồ.</p>
+                  </div>
+                </div>
+                <div className="class-reminder-settings-controls">
+                  <label>
+                    Nhắc trước
+                    <select aria-label="Thời gian nhắc trước giờ học" value={classReminderPreferences.minutesBefore} onChange={handleReminderLeadChange}>
+                      <option value={15}>15 phút</option>
+                      <option value={30}>30 phút</option>
+                    </select>
+                  </label>
+                  <button type="button" className={`button ${classReminderPreferences.enabled ? "outline" : "primary"}`} onClick={handleToggleClassReminder}>
+                    {classReminderPreferences.enabled ? "Tắt nhắc giờ" : "Bật nhắc giờ"}
+                  </button>
+                </div>
+                {reminderMessage && <small className="class-reminder-settings-message" role="status">{reminderMessage}</small>}
+                <small className="class-reminder-settings-note">Thông báo yêu cầu quyền trình duyệt. Lịch nhắc hoạt động khi trang web đang mở.</small>
+              </div>
               {notifications.map((item) => (
                 <div key={item.id} className={`notify-row ${item.kind}`}>
                   <span className="notify-dot" />

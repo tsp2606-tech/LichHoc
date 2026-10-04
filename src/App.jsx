@@ -8,6 +8,7 @@ import SettingsPage from "./pages/SettingsPage";
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import HelpPage from "./pages/HelpPage";
+import ClassReminder from "./components/ClassReminder";
 import { clearAuth, getAuthToken, getCurrentUser } from "./lib/api";
 import { applyBackgroundPreference } from "./lib/backgroundPreference";
 
@@ -78,6 +79,7 @@ function App() {
     <div className="app-shell">
       <Sidebar page={page} go={go} user={user} onLogout={handleLogout} />
       <div className="main-column">
+        <ClassReminder user={user} />
         <Topbar title={titles[page] || titles.calendar} user={user} onLogout={handleLogout} isDark={isDark} onToggleTheme={() => setIsDark((current) => !current)} />
         <main className="page-content">
           <div key={page} className="page-transition">
