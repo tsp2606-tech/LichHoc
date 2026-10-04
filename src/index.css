@@ -5356,6 +5356,133 @@ body::before {
   color: #475569 !important;
 }
 
+/* Polished, restrained motion throughout the app. */
+.page-transition > * {
+  animation: content-arrive 460ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+.page-transition > *:nth-child(2) {
+  animation-delay: 55ms;
+}
+
+.page-transition > *:nth-child(3) {
+  animation-delay: 100ms;
+}
+
+.page-transition > *:nth-child(4) {
+  animation-delay: 140ms;
+}
+
+.panel,
+.calendar-panel,
+.table-panel,
+.settings-panel,
+.notification-item {
+  transition:
+    border-color 220ms ease,
+    box-shadow 260ms ease,
+    background-color 220ms ease;
+}
+
+.panel:hover,
+.calendar-panel:hover,
+.table-panel:hover {
+  box-shadow: 0 12px 32px rgba(23, 37, 67, .10);
+}
+
+.dark .panel:hover,
+.dark .calendar-panel:hover,
+.dark .table-panel:hover,
+:root[data-theme="dark"] .panel:hover,
+:root[data-theme="dark"] .calendar-panel:hover,
+:root[data-theme="dark"] .table-panel:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .24);
+}
+
+.button.primary,
+.button:not(.outline):not(:disabled) {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.button.primary::after,
+.button:not(.outline):not(:disabled)::after {
+  position: absolute;
+  z-index: -1;
+  top: -40%;
+  bottom: -40%;
+  left: -55%;
+  width: 34%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .24), transparent);
+  content: "";
+  transform: skewX(-18deg);
+  transition: left 520ms cubic-bezier(.2, .7, .3, 1);
+}
+
+.button.primary:hover::after,
+.button:not(.outline):not(:disabled):hover::after {
+  left: 125%;
+}
+
+.notification-panel {
+  transform-origin: top right;
+  animation: notification-arrive 190ms cubic-bezier(.2, .8, .3, 1) both;
+}
+
+.notification-item:hover {
+  transform: translateX(3px);
+}
+
+.auth-art .auth-message {
+  animation: content-arrive 650ms cubic-bezier(.2, .75, .25, 1) both;
+}
+
+.auth-preview {
+  animation: preview-float 5s ease-in-out 700ms infinite alternate;
+}
+
+.password-visibility-toggle,
+.topbar-theme-toggle svg {
+  transition: transform 200ms cubic-bezier(.2, .8, .3, 1), color 160ms ease, background-color 160ms ease;
+}
+
+.password-visibility-toggle:hover {
+  transform: translateY(-50%) scale(1.08);
+}
+
+.class-card:hover,
+.calendar-event:hover {
+  filter: brightness(1.025) saturate(1.04);
+}
+
+@keyframes content-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes notification-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes preview-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-5px); }
+}
+
 .background-settings-body {
   display: grid;
   grid-template-columns: minmax(220px, 320px) minmax(0, 1fr);
