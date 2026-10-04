@@ -1,9 +1,38 @@
-import { useState, useEffect, useMemo } from "react";
-import { CalendarDays, GraduationCap, CheckCircle2, AlertCircle } from "lucide-react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { CalendarDays, GraduationCap, CheckCircle2, AlertCircle, ImagePlus, RotateCcw } from "lucide-react";
 import { PageHeading, Badge } from "../components/AppShell";
 import { getCurrentUser, setCurrentUser, updateUserProfile, getUserProfile } from "../lib/api";
 import { getNotifications } from "../lib/notifications";
 import { ErrorDialog } from "../components/ErrorDialog";
+import { applyBackgroundPreference, getSavedBackground, resetBackgroundPreference, saveBackgroundPreference } from "../lib/backgroundPreference";
+
+function compressBackgroundImage(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("Không thể đọc tệp ảnh."));
+    reader.onload = () => {
+      const image = new Image();
+      image.onerror = () => reject(new Error("Tệp đã chọn không phải ảnh hợp lệ."));
+      image.onload = () => {
+        const scale = Math.min(1, 1920 / Math.max(image.naturalWidth, image.naturalHeight));
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        const context = canvas.getContext("2d");
+        if (!context) {
+          reject(new Error("Trình duyệt không hỗ trợ xử lý ảnh này."));
+          return;
+        }
+        context.fillStyle = "#ffffff";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.84));
+      };
+      image.src = String(reader.result);
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 export function SettingsPage() {
   const [currentUser, setUserState] = useState(() => getCurrentUser());
@@ -22,6 +51,10 @@ export function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null); // { type: 'success' | 'error', text: string }
   const [errorDialog, setErrorDialog] = useState(null);
+  const backgroundInputRef = useRef(null);
+  const [customBackground, setCustomBackground] = useState(() => getSavedBackground(currentUser));
+  const [backgroundMessage, setBackgroundMessage] = useState("");
+  const [savingBackground, setSavingBackground] = useState(false);
 
 
   // Đồng bộ thông tin mới nhất từ BE khi vào trang
@@ -143,6 +176,41 @@ export function SettingsPage() {
   const userName = currentUser?.name || (currentUser?.email ? currentUser.email.split("@")[0].replace(/[._]/g, " ") : "Người dùng");
   const avatarInitial = (userName.charAt(0) || "U").toUpperCase();
   const notifications = getNotifications().slice(0, 4);
+
+  const handleBackgroundChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setBackgroundMessage("Vui lòng chọn ảnh JPG, PNG hoặc WebP.");
+      event.target.value = "";
+      return;
+    }
+    if (file.size > 12 * 1024 * 1024) {
+      setBackgroundMessage("Ảnh cần nhỏ hơn 12 MB.");
+      event.target.value = "";
+      return;
+    }
+
+    setSavingBackground(true);
+    setBackgroundMessage("");
+    try {
+      const imageData = await compressBackgroundImage(file);
+      saveBackgroundPreference(currentUser, imageData);
+      setCustomBackground(imageData);
+      setBackgroundMessage("Đã cập nhật hình nền cho tài khoản này trên trình duyệt hiện tại.");
+    } catch (err) {
+      setBackgroundMessage(err.message || "Không thể lưu ảnh nền. Vui lòng thử ảnh khác.");
+    } finally {
+      setSavingBackground(false);
+      event.target.value = "";
+    }
+  };
+
+  const handleResetBackground = () => {
+    resetBackgroundPreference(currentUser);
+    setCustomBackground("");
+    setBackgroundMessage("Đã khôi phục hình nền mặc định theo giao diện sáng/tối.");
+  };
 
   return (
     <>
@@ -273,6 +341,46 @@ export function SettingsPage() {
                 />
               </label>
             </form>
+          </section>
+
+          <section className="panel settings-panel background-settings-panel">
+            <div className="settings-title">
+              <div>
+                <h2>Hình nền giao diện</h2>
+                <p>Chọn ảnh riêng cho không gian học tập của bạn. Nền mặc định sẽ tự đổi theo giao diện sáng hoặc tối.</p>
+              </div>
+            </div>
+            <div className="background-settings-body">
+              <div
+                className="background-preview"
+                style={{ backgroundImage: customBackground ? `url("${customBackground}")` : "var(--lichhoc-artwork)" }}
+                role="img"
+                aria-label={customBackground ? "Ảnh nền tùy chỉnh hiện tại" : "Ảnh nền mặc định hiện tại"}
+              >
+                <span>{customBackground ? "Nền tùy chỉnh" : "Nền mặc định"}</span>
+              </div>
+              <div className="background-settings-actions">
+                <input
+                  ref={backgroundInputRef}
+                  className="visually-hidden-file-input"
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleBackgroundChange}
+                  aria-label="Chọn ảnh nền"
+                />
+                <button type="button" className="button outline" onClick={() => backgroundInputRef.current?.click()} disabled={savingBackground}>
+                  <ImagePlus size={16} />
+                  {savingBackground ? "Đang xử lý ảnh..." : "Chọn ảnh từ thiết bị"}
+                </button>
+                {customBackground && (
+                  <button type="button" className="button outline" onClick={handleResetBackground}>
+                    <RotateCcw size={16} />
+                    Dùng nền mặc định
+                  </button>
+                )}
+                {backgroundMessage && <p className="background-settings-message" role="status">{backgroundMessage}</p>}
+              </div>
+            </div>
           </section>
 
           <section className="panel settings-panel">

@@ -9,6 +9,7 @@ import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import HelpPage from "./pages/HelpPage";
 import { clearAuth, getAuthToken, getCurrentUser } from "./lib/api";
+import { applyBackgroundPreference } from "./lib/backgroundPreference";
 
 const protectedPages = new Set(["calendar", "import", "manage", "admin", "settings"]);
 
@@ -27,6 +28,10 @@ function App() {
     document.documentElement.classList.toggle("dark", isDark);
     localStorage.setItem("lichhoc_theme", isDark ? "dark" : "light");
   }, [isDark]);
+
+  useEffect(() => {
+    applyBackgroundPreference(user);
+  }, [user?.id, user?.email]);
 
   useEffect(() => {
     const onHashChange = () => {
