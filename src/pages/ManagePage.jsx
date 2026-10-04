@@ -5,6 +5,7 @@ import { Stat } from "../components/Display";
 import { classes } from "../data/mockSchedule";
 import { deleteCourseById, formatCourseFromEvent, getCurrentUser, getMySchedule, updateCourseById } from "../lib/api";
 import { ErrorDialog } from "../components/ErrorDialog";
+import { getCourseColor, saveCourseColor } from "../lib/coursePreferences";
 
 export function ManagePage() {
   const [courses, setCourses] = useState(classes);
@@ -14,6 +15,7 @@ export function ManagePage() {
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [errorDialog, setErrorDialog] = useState(null);
+  const [colorRevision, setColorRevision] = useState(0);
 
 
   const loadCourses = async () => {
@@ -168,6 +170,7 @@ export function ManagePage() {
                 <th>PHÒNG</th>
                 <th>GIẢNG VIÊN</th>
                 <th>TRẠNG THÁI</th>
+                <th>MÀU LỊCH</th>
                 <th></th>
               </tr>
             </thead>
@@ -186,6 +189,20 @@ export function ManagePage() {
                   <td>{c.teacher}</td>
                   <td><Badge tone={i === 0 ? "amber" : "green"}>{c.status}</Badge></td>
                   <td>
+                    <label className="course-color-picker" title="Đổi màu môn học trên lịch" data-revision={colorRevision}>
+                      <input
+                        type="color"
+                        aria-label={`Đổi màu lịch môn ${c.name}`}
+                        value={getCourseColor(c) || "#3b82f6"}
+                        onChange={(event) => {
+                          saveCourseColor(c, event.target.value);
+                          setColorRevision((revision) => revision + 1);
+                        }}
+                      />
+                      <span>Đổi màu</span>
+                    </label>
+                  </td>
+                  <td>
                     <div className="row-actions">
                       <button type="button" aria-label="Sửa" onClick={() => startEditing(c)}>Sửa</button>
                       <button type="button" aria-label="Xóa" onClick={() => removeCourse(c)}>Xóa</button>
@@ -195,7 +212,7 @@ export function ManagePage() {
               ))}
               {filteredCourses.length === 0 && (
                 <tr>
-                  <td colSpan="7" className="search-empty-state">Không tìm thấy lớp học phù hợp với “{searchQuery}”.</td>
+                  <td colSpan="8" className="search-empty-state">Không tìm thấy lớp học phù hợp với “{searchQuery}”.</td>
                 </tr>
               )}
             </tbody>

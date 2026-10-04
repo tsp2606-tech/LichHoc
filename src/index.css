@@ -5570,3 +5570,50 @@ body::before {
     flex: 1 1 auto;
   }
 }
+.course-color-picker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--d-muted-foreground, #475569);
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.course-color-picker input[type="color"] {
+  width: 30px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid var(--d-border, #cbd5e1);
+  border-radius: 8px;
+  background: var(--d-card, #fff);
+  cursor: pointer;
+}
+
+.schedule-conflict-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 16px;
+  margin: 0 0 14px;
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-left: 4px solid #dc2626;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.dark .schedule-conflict-banner {
+  color: #fecaca;
+  background: #3b171d;
+  border-color: #7f1d1d;
+  border-left-color: #f87171;
+}
+
+@media (max-width: 640px) {
+  .schedule-conflict-banner {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+}

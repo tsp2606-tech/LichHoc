@@ -3,8 +3,9 @@ import { BookOpen, Clock3, Activity, RefreshCw, MapPin } from "lucide-react";
 import { PageHeading, Button } from "../components/AppShell";
 import { Stat } from "../components/Display";
 import { classes } from "../data/mockSchedule";
-import { formatCourseFromEvent, getMySchedule } from "../lib/api";
+import { formatCourseFromEvent, getCurrentUser, getMySchedule } from "../lib/api";
 import { ErrorDialog } from "../components/ErrorDialog";
+import { getCourseColor, getCourseColorStyles } from "../lib/coursePreferences";
 
 function parseMinutes(timeStr) {
   if (!timeStr) return 0;
@@ -85,6 +86,13 @@ export function CalendarPage() {
   const [syncMessage, setSyncMessage] = useState("");
   const [syncSuccess, setSyncSuccess] = useState(true);
   const [errorDialog, setErrorDialog] = useState(null);
+  const [colorRevision, setColorRevision] = useState(0);
+
+  useEffect(() => {
+    const refreshCourseColors = () => setColorRevision((revision) => revision + 1);
+    window.addEventListener("lichhoc-course-colors-changed", refreshCourseColors);
+    return () => window.removeEventListener("lichhoc-course-colors-changed", refreshCourseColors);
+  }, []);
 
   // Trạng thái ngày đang chọn & Chế độ xem: "list" (Liệt kê - mặc định trên điện thoại) | "week" (Tuần) | "month" (Tháng)
   const [userManuallySelectedView, setUserManuallySelectedView] = useState(false);
@@ -444,12 +452,13 @@ export function CalendarPage() {
           endTime: eTime,
           timeText: `${sTime} - ${eTime}`,
           isOnline: c.isOnline || /online/i.test(c.room || "") || /online/i.test(c.location || ""),
+          calendarColor: getCourseColor(c, getCurrentUser()),
         });
       }
     });
 
     return Array.from(map.values());
-  }, [apiCourses]);
+  }, [apiCourses, colorRevision]);
 
   // Các môn học hiển thị cho tuần đang xem
   const displayedCourses = useMemo(() => {
@@ -471,6 +480,35 @@ export function CalendarPage() {
 
     return uniqueCourses;
   }, [isCurrentViewActiveWeek, uniqueCourses, monday]);
+
+  const scheduleConflicts = useMemo(() => {
+    const conflicts = [];
+    const dayNames = ["Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy", "Chủ Nhật"];
+    for (let i = 0; i < displayedCourses.length; i += 1) {
+      const first = displayedCourses[i];
+      const firstStart = parseMinutes(first.startTime);
+      const firstEnd = parseMinutes(first.endTime);
+      if (firstEnd <= firstStart) continue;
+      for (let j = i + 1; j < displayedCourses.length; j += 1) {
+        const second = displayedCourses[j];
+        if (first.dayIndex !== second.dayIndex) continue;
+        const secondStart = parseMinutes(second.startTime);
+        const secondEnd = parseMinutes(second.endTime);
+        if (secondEnd <= secondStart || firstStart >= secondEnd || secondStart >= firstEnd) continue;
+        conflicts.push({
+          first,
+          second,
+          dayName: dayNames[first.dayIndex] || "Cùng ngày",
+          overlap: `${firstStart > secondStart ? first.startTime : second.startTime}–${firstEnd < secondEnd ? first.endTime : second.endTime}`,
+        });
+      }
+    }
+    return conflicts;
+  }, [displayedCourses]);
+
+  const conflictingCourseIds = useMemo(() => new Set(
+    scheduleConflicts.flatMap(({ first, second }) => [first.id, second.id])
+  ), [scheduleConflicts]);
 
   // #4. Tính toán tiết học tiếp theo một cách đồng bộ từ dữ liệu
   const nextClass = useMemo(() => {
@@ -738,6 +776,18 @@ export function CalendarPage() {
           </div>
         </div>
 
+        {scheduleConflicts.length > 0 && (
+          <div className="schedule-conflict-banner" role="alert">
+            <strong>Phát hiện {scheduleConflicts.length} cặp môn bị trùng giờ</strong>
+            <span>
+              {scheduleConflicts.slice(0, 3).map(({ first, second, dayName, overlap }) =>
+                `${dayName}, ${overlap}: ${first.subject} và ${second.subject}`
+              ).join(" · ")}
+              {scheduleConflicts.length > 3 ? ` · và ${scheduleConflicts.length - 3} cặp khác` : ""}
+            </span>
+          </div>
+        )}
+
         {/* 1. Chế độ xem theo TUẦN (RadScheduler Timeline) */}
         {viewMode === "week" && (
         <div style={{ overflowX: "auto", minWidth: "100%", background: "var(--d-background, #ffffff)" }}>
@@ -937,9 +987,10 @@ export function CalendarPage() {
                       // Môn học online màu xanh lá, offline màu vàng
                       const isOnline = c.isOnline;
 
-                      const bgCard = isOnline ? "var(--d-bg-online, #c0ffc0)" : "var(--d-bg-offline, #fff0b3)";
-                      const borderCard = isOnline ? "var(--d-border-online, #82e282)" : "var(--d-border-offline, #e6c65b)";
-                      const textCard = isOnline ? "var(--d-text-online, #0f5132)" : "var(--d-text-offline, #78350f)";
+                      const customColorStyles = getCourseColorStyles(c.calendarColor);
+                      const bgCard = customColorStyles?.backgroundColor || (isOnline ? "var(--d-bg-online, #c0ffc0)" : "var(--d-bg-offline, #fff0b3)");
+                      const borderCard = conflictingCourseIds.has(c.id) ? "#dc2626" : customColorStyles?.borderColor || (isOnline ? "var(--d-border-online, #82e282)" : "var(--d-border-offline, #e6c65b)");
+                      const textCard = customColorStyles?.color || (isOnline ? "var(--d-text-online, #0f5132)" : "var(--d-text-offline, #78350f)");
 
                       return (
                         <div
@@ -953,6 +1004,8 @@ export function CalendarPage() {
                             right: "3px",
                             backgroundColor: bgCard,
                             border: `1px solid ${borderCard}`,
+                            outline: conflictingCourseIds.has(c.id) ? "2px solid #dc2626" : "none",
+                            outlineOffset: conflictingCourseIds.has(c.id) ? "1px" : undefined,
                             borderRadius: "5px",
                             padding: "5px 6px",
                             boxSizing: "border-box",
@@ -1166,9 +1219,9 @@ export function CalendarPage() {
                                 borderRadius: "4px",
                                 fontSize: "10.5px",
                                 fontWeight: "600",
-                                backgroundColor: "var(--d-primary, #eff6ff)",
-                                color: "var(--d-primary-foreground, #1d4ed8)",
-                                border: "1px solid var(--d-primary, #bfdbfe)",
+                                backgroundColor: getCourseColorStyles(c.calendarColor)?.backgroundColor || "var(--d-primary, #eff6ff)",
+                                color: getCourseColorStyles(c.calendarColor)?.color || "var(--d-primary-foreground, #1d4ed8)",
+                                border: `1px solid ${getCourseColorStyles(c.calendarColor)?.borderColor || "var(--d-primary, #bfdbfe)"}`,
                                 whiteSpace: "nowrap",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
@@ -1231,6 +1284,11 @@ export function CalendarPage() {
                         <div
                           key={cIdx}
                           className="calendar-list-course-card"
+                          style={{
+                            ...(getCourseColorStyles(course.calendarColor) || {}),
+                            borderLeft: `4px solid ${conflictingCourseIds.has(course.id) ? "#dc2626" : course.calendarColor || "var(--d-primary, #2563eb)"}`,
+                            ...(conflictingCourseIds.has(course.id) ? { boxShadow: "0 0 0 1px #dc2626" } : {}),
+                          }}
                         >
                           {/* Cột thời gian */}
                           <div className="course-card-time-block">
